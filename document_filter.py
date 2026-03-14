@@ -1,4 +1,5 @@
 import re
+import time
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -9,15 +10,27 @@ from config import HUBSPOT_TOKEN
 
 DOCUMENT_REPORT_FILE = "document_report.xlsx"
 OUTPUT_FILE = "documents_to_process.xlsx"
-REQUEST_TIMEOUT_SECONDS = 30
+REQUEST_CONNECT_TIMEOUT_SECONDS = 10
+REQUEST_READ_TIMEOUT_SECONDS = 30
+REQUEST_RETRY_COUNT = 3
+REQUEST_RETRY_DELAY_SECONDS = 2
 ASSOCIATION_BATCH_SIZE = 1000
 NOTE_BATCH_SIZE = 100
 EXPECTED_NO_ASSOCIATION_SUBCATEGORY = "crm.associations.NO_ASSOCIATIONS_FOUND"
+REQUIRED_FILE_SCOPES = {"files", "files.ui_hidden.read"}
 
 HEADERS = {
     "Authorization": f"Bearer {HUBSPOT_TOKEN}",
     "Content-Type": "application/json",
 }
+
+
+class HubSpotConnectionError(RuntimeError):
+    pass
+
+
+class HubSpotConfigurationError(RuntimeError):
+    pass
 
 
 def chunked(values, size):
@@ -62,13 +75,30 @@ def normalize_filename(filename):
 
 
 def hubspot_request(method, url, **kwargs):
-    return requests.request(
-        method,
-        url,
-        headers=HEADERS,
-        timeout=REQUEST_TIMEOUT_SECONDS,
-        **kwargs,
-    )
+    last_error = None
+
+    for attempt in range(1, REQUEST_RETRY_COUNT + 1):
+        try:
+            return requests.request(
+                method,
+                url,
+                headers=HEADERS,
+                timeout=(REQUEST_CONNECT_TIMEOUT_SECONDS, REQUEST_READ_TIMEOUT_SECONDS),
+                **kwargs,
+            )
+        except requests.exceptions.RequestException as error:
+            last_error = error
+            if attempt < REQUEST_RETRY_COUNT:
+                print(
+                    f"HubSpot request failed ({attempt}/{REQUEST_RETRY_COUNT}) for {url}. "
+                    f"Retrying in {REQUEST_RETRY_DELAY_SECONDS} seconds..."
+                )
+                time.sleep(REQUEST_RETRY_DELAY_SECONDS)
+
+    raise HubSpotConnectionError(
+        "Unable to reach the HubSpot API at api.hubapi.com after multiple attempts. "
+        "Check your internet connection, DNS, VPN, or firewall settings and try again."
+    ) from last_error
 
 
 def parse_json_response(response, allowed_status_codes, error_label):
@@ -232,6 +262,44 @@ def fetch_attachment_names_by_id(attachment_ids):
     return attachment_names_by_id, missing_file_scope
 
 
+def fetch_private_app_token_info():
+    response = hubspot_request(
+        "POST",
+        "https://api.hubapi.com/oauth/v2/private-apps/get/access-token-info",
+        json={"tokenKey": HUBSPOT_TOKEN},
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def build_missing_file_scopes_message():
+    try:
+        token_info = fetch_private_app_token_info()
+    except Exception:
+        return (
+            "This HubSpot private app is missing the required file scopes needed to subtract "
+            "record attachments from the document list. Add `files` and `files.ui_hidden.read` "
+            "in HubSpot under Settings > Integrations > Private Apps > your app > Scopes, "
+            "then click Commit changes and rerun the script."
+        )
+
+    granted_scopes = set(token_info.get("scopes", []))
+    missing_scopes = sorted(REQUIRED_FILE_SCOPES - granted_scopes)
+    missing_scopes_text = ", ".join(f"`{scope}`" for scope in missing_scopes) or (
+        "`files`, `files.ui_hidden.read`"
+    )
+
+    return (
+        "This HubSpot private app cannot read attachment filenames, so the attachment files "
+        "cannot be reliably removed from `document_report.xlsx` yet. "
+        f"Missing scopes: {missing_scopes_text}. "
+        "In HubSpot, open Settings > Integrations > Private Apps > this app > Scopes, add the "
+        "missing file scopes, then click Commit changes. HubSpot's docs say the private app "
+        "access token updates to reflect the new scopes and the token string itself does not change, "
+        "so after saving you can rerun the script with the same `.env` token."
+    )
+
+
 def build_attachment_names_by_contact(attachment_ids_by_contact):
     all_attachment_ids = {
         attachment_id
@@ -240,6 +308,8 @@ def build_attachment_names_by_contact(attachment_ids_by_contact):
     }
 
     attachment_names_by_id, missing_file_scope = fetch_attachment_names_by_id(all_attachment_ids)
+    if missing_file_scope:
+        raise HubSpotConfigurationError(build_missing_file_scopes_message())
 
     attachment_names_by_contact = defaultdict(set)
     for contact_id, attachment_ids in attachment_ids_by_contact.items():
@@ -301,38 +371,47 @@ def main():
     print("Contacts with attachments:", contacts_with_attachments)
     print("Attachments found:", len(all_attachment_ids))
 
-    attachment_names_by_contact, missing_file_scope = build_attachment_names_by_contact(
-        attachment_ids_by_contact
-    )
-    if missing_file_scope:
-        print(
-            "Attachment filename lookup skipped: the token is missing HubSpot files scopes."
-        )
-
     print("Filtering already uploaded files...")
 
     direct_file_id_matches = 0
     filename_matches = 0
     already_attached_flags = []
+    contacts_needing_filename_lookup = set()
 
     for row in documents_df.to_dict("records"):
         contact_attachment_ids = attachment_ids_by_contact.get(row["contact_id"], set())
-        contact_attachment_names = attachment_names_by_contact.get(row["contact_id"], set())
 
         if row["document_file_id"] and row["document_file_id"] in contact_attachment_ids:
             direct_file_id_matches += 1
             already_attached_flags.append(True)
             continue
 
-        if (
-            row["normalized_document_filename"]
-            and row["normalized_document_filename"] in contact_attachment_names
-        ):
-            filename_matches += 1
-            already_attached_flags.append(True)
-            continue
-
+        if row["normalized_document_filename"] and contact_attachment_ids:
+            contacts_needing_filename_lookup.add(row["contact_id"])
         already_attached_flags.append(False)
+
+    attachment_names_by_contact = {}
+    if contacts_needing_filename_lookup:
+        attachment_names_by_contact = build_attachment_names_by_contact(
+            {
+                contact_id: attachment_ids_by_contact[contact_id]
+                for contact_id in contacts_needing_filename_lookup
+                if attachment_ids_by_contact.get(contact_id)
+            }
+        )
+
+        for index, row in enumerate(documents_df.to_dict("records")):
+            if already_attached_flags[index]:
+                continue
+
+            normalized_filename = row["normalized_document_filename"]
+            if not normalized_filename:
+                continue
+
+            contact_attachment_names = attachment_names_by_contact.get(row["contact_id"], set())
+            if normalized_filename in contact_attachment_names:
+                filename_matches += 1
+                already_attached_flags[index] = True
 
     documents_df["already_attached"] = already_attached_flags
     print("Documents matched by attachment file ID:", direct_file_id_matches)
@@ -358,4 +437,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except HubSpotConnectionError as error:
+        print(error)
+    except HubSpotConfigurationError as error:
+        print(error)

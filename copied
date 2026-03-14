@@ -1,0 +1,209 @@
+import json
+import os
+import time
+from urllib.parse import urlparse, parse_qs, unquote
+
+import pandas as pd
+import requests
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=".env")
+
+HUBSPOT_TOKEN = os.getenv("HUBSPOT_TOKEN")
+
+if not HUBSPOT_TOKEN:
+    raise ValueError("HUBSPOT_TOKEN was not found in the .env file")
+
+HEADERS = {
+    "Authorization": f"Bearer {HUBSPOT_TOKEN}",
+    "Content-Type": "application/json",
+    "Connection": "close",
+}
+
+CHECKPOINT_FILE = "checkpoint.json"
+OUTPUT_FILE = "documents_report.xlsx"
+FAILED_FILE = "failed_contacts.xlsx"
+
+
+def load_checkpoint():
+    with open(CHECKPOINT_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data["last_run"]
+
+
+def search_modified_contacts(last_run, limit=20):
+    search_url = "https://api.hubapi.com/crm/v3/objects/contacts/search"
+    all_contacts = []
+    after = None
+
+    while True:
+        payload = {
+            "filterGroups": [
+                {
+                    "filters": [
+                        {
+                            "propertyName": "lastmodifieddate",
+                            "operator": "GT",
+                            "value": last_run,
+                        }
+                    ]
+                }
+            ],
+            "properties": ["firstname", "lastname"],
+            "limit": limit,
+        }
+
+        if after:
+            payload["after"] = after
+
+        response = requests.post(search_url, headers=HEADERS, json=payload, timeout=30)
+        print("Search status code:", response.status_code)
+
+        if response.status_code != 200:
+            print(response.text)
+            response.raise_for_status()
+
+        data = response.json()
+        results = data.get("results", [])
+
+        if not results:
+            break
+
+        for contact in results:
+            all_contacts.append(
+                {
+                    "contact_id": contact["id"],
+                    "first_name": contact.get("properties", {}).get("firstname", ""),
+                    "last_name": contact.get("properties", {}).get("lastname", ""),
+                }
+            )
+
+        paging = data.get("paging", {})
+        next_info = paging.get("next", {})
+        after = next_info.get("after")
+
+        if not after:
+            break
+
+    return all_contacts
+
+
+def get_document_history(contact_id):
+    url = f"https://api.hubapi.com/crm/v3/objects/contacts/{contact_id}?propertiesWithHistory=documentos"
+    response = requests.get(url, headers=HEADERS, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+    return data.get("propertiesWithHistory", {}).get("documentos", [])
+
+
+def extract_documents(contact):
+    contact_id = contact["contact_id"]
+    full_name = f"{contact['first_name']} {contact['last_name']}".strip()
+
+    history_entries = get_document_history(contact_id)
+    rows = []
+
+    for entry in history_entries:
+        timestamp = entry.get("timestamp", "")
+        value = entry.get("value", "")
+
+        if not value:
+            continue
+
+        urls = value.split(";")
+
+        for file_url in urls:
+            file_url = file_url.strip()
+            if not file_url:
+                continue
+
+            parsed = urlparse(file_url)
+            params = parse_qs(parsed.query)
+
+            filename = params.get("filename", ["unknown_file"])[0]
+            filename = unquote(filename)
+
+            rows.append(
+                {
+                    "contact_id": contact_id,
+                    "contact_name": full_name,
+                    "document_timestamp": timestamp,
+                    "document_filename": filename,
+                    "document_url": file_url,
+                }
+            )
+
+    return rows
+
+
+def main():
+    print("=== HUBSPOT DOCUMENT EXTRACTION ===")
+    print()
+
+    # print("Token loaded: YES")
+    last_run = load_checkpoint()
+    print("Checkpoint:", last_run)
+    print()
+
+    contacts = search_modified_contacts(last_run=last_run, limit=20)
+
+    print()
+    print("=== CONTACTS RETURNED ===")
+    for c in contacts:
+        full_name = f"{c['first_name']} {c['last_name']}".strip()
+        print(f"{c['contact_id']} - {full_name}")
+
+    print()
+    print("Total contacts found:", len(contacts))
+    print()
+
+    all_documents = []
+    failed_contacts = []
+
+    for index, contact in enumerate(contacts, start=1):
+        full_name = f"{contact['first_name']} {contact['last_name']}".strip()
+        print(f"Checking contact {index}/{len(contacts)}: {contact['contact_id']} - {full_name}")
+
+        try:
+            docs = extract_documents(contact)
+            all_documents.extend(docs)
+        except Exception as e:
+            failed_contacts.append(
+                {
+                    "contact_id": contact["contact_id"],
+                    "contact_name": full_name,
+                    "error": str(e),
+                }
+            )
+
+        time.sleep(0.5)
+
+    print()
+    print("=== EXTRACTION SUMMARY ===")
+    print("Total contacts checked:", len(contacts))
+    print("Total documents extracted:", len(all_documents))
+    print("Total failed contacts:", len(failed_contacts))
+    print()
+
+    print("=== DOCUMENT ARRANGEMENT PREVIEW ===")
+    for item in all_documents[:6]:
+        print("Contact ID:", item["contact_id"])
+        print("Contact Name:", item["contact_name"])
+        print("Document Timestamp:", item["document_timestamp"])
+        print("Document Filename:", item["document_filename"])
+        print("Document URL:", item["document_url"])
+        print("-----")
+
+    if all_documents:
+        df = pd.DataFrame(all_documents)
+        df.to_excel(OUTPUT_FILE, index=False)
+        print(f"Saved: {OUTPUT_FILE}")
+
+    if failed_contacts:
+        failed_df = pd.DataFrame(failed_contacts)
+        failed_df.to_excel(FAILED_FILE, index=False)
+        print(f"Saved: {FAILED_FILE}")
+
+
+if __name__ == "__main__":
+    main()
