@@ -72,3 +72,12 @@ Desktop.ini
 
 # Other
 checkpoint.json
+
+# Generated local artifacts
+chatgpt_browser_profile/
+vec_browser_profile/
+downloaded_pdfs/
+uploaded_pdfs/
+skipped_pdfs/
+vec_upload_tmp/
+vec_debug/

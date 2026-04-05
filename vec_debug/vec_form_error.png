@@ -1,0 +1,4 @@
+Page.screenshot: Timeout 20000ms exceeded.
+Call log:
+  - taking page screenshot
+  - waiting for fonts to load...

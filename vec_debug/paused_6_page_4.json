@@ -1,0 +1,9 @@
+{
+  "url": "chrome://new-tab-page/",
+  "title": "New Tab",
+  "frame_urls": [
+    "chrome://new-tab-page/",
+    "about:blank",
+    "chrome-untrusted://new-tab-page/one-google-bar?paramsencoded="
+  ]
+}

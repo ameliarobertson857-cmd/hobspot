@@ -1,0 +1,180 @@
+{
+  "skipped_pdfs": [
+    {
+      "skipped_at": "2026-03-30T17:52:07",
+      "source_pdf_path": "downloaded_pdfs\\3a4b372b-1e84-4c7d-b7b5-f58c40636817-documentos-diabetes mellitus.pdf",
+      "source_pdf_filename": "3a4b372b-1e84-4c7d-b7b5-f58c40636817-documentos-diabetes mellitus.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\3a4b372b-1e84-4c7d-b7b5-f58c40636817-documentos-diabetes mellitus.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: missing required fields: institution_name, center_search_text | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: institution_name"
+    },
+    {
+      "skipped_at": "2026-03-30T17:52:43",
+      "source_pdf_path": "downloaded_pdfs\\bbe9896e-072d-4a2b-904f-7f5b4d13cdf1-documentos-traduccion cursos bellvitge.pdf",
+      "source_pdf_filename": "bbe9896e-072d-4a2b-904f-7f5b4d13cdf1-documentos-traduccion cursos bellvitge.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\bbe9896e-072d-4a2b-904f-7f5b4d13cdf1-documentos-traduccion cursos bellvitge.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route"
+    },
+    {
+      "skipped_at": "2026-03-30T17:53:20",
+      "source_pdf_path": "downloaded_pdfs\\0a685131-9597-4091-beee-2645b8536a58-documentos-TÉCNICAS DE RADIOLOGÍA DE URGENCIAS-823fa9.pdf",
+      "source_pdf_filename": "0a685131-9597-4091-beee-2645b8536a58-documentos-TÉCNICAS DE RADIOLOGÍA DE URGENCIAS-823fa9.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\0a685131-9597-4091-beee-2645b8536a58-documentos-TÉCNICAS DE RADIOLOGÍA DE URGENCIAS-823fa9.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR"
+    },
+    {
+      "skipped_at": "2026-03-30T17:53:58",
+      "source_pdf_path": "downloaded_pdfs\\8894ebeb-0850-4389-938f-1dc31c9989da-documentos-3 (1).pdf",
+      "source_pdf_filename": "8894ebeb-0850-4389-938f-1dc31c9989da-documentos-3 (1).pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\8894ebeb-0850-4389-938f-1dc31c9989da-documentos-3 (1).pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route"
+    },
+    {
+      "skipped_at": "2026-03-30T18:03:20",
+      "source_pdf_path": "downloaded_pdfs\\f206bda2-234f-44e1-89f3-e5869e391763-documentos-VALORACION Y CUIDADOS ENFERMEROS A PERSONAS CON PROBLEMAS HEMATOLOGICOS.pdf",
+      "source_pdf_filename": "f206bda2-234f-44e1-89f3-e5869e391763-documentos-VALORACION Y CUIDADOS ENFERMEROS A PERSONAS CON PROBLEMAS HEMATOLOGICOS.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\f206bda2-234f-44e1-89f3-e5869e391763-documentos-VALORACION Y CUIDADOS ENFERMEROS A PERSONAS CON PROBLEMAS HEMATOLOGICOS.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: start_date, end_date | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:12:46",
+      "source_pdf_path": "downloaded_pdfs\\d51ddd42-2f06-4ce6-9c16-62464125b480-documentos-Nombramiento Alfambra 11.07.25 a 10.07.28-897316.pdf",
+      "source_pdf_filename": "d51ddd42-2f06-4ce6-9c16-62464125b480-documentos-Nombramiento Alfambra 11.07.25 a 10.07.28-897316.pdf",
+      "archived_pdf_path": "skipped_pdfs\\no_text\\d51ddd42-2f06-4ce6-9c16-62464125b480-documentos-Nombramiento Alfambra 11.07.25 a 10.07.28-897316.pdf",
+      "status": "skipped_no_text",
+      "reason": "No text could be extracted from the PDF: downloaded_pdfs\\d51ddd42-2f06-4ce6-9c16-62464125b480-documentos-Nombramiento Alfambra 11.07.25 a 10.07.28-897316.pdf"
+    },
+    {
+      "skipped_at": "2026-03-30T18:12:56",
+      "source_pdf_path": "downloaded_pdfs\\afa778e4-cfc0-485d-8374-e49320bc963b-documentos-10-238e53.pdf",
+      "source_pdf_filename": "afa778e4-cfc0-485d-8374-e49320bc963b-documentos-10-238e53.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\afa778e4-cfc0-485d-8374-e49320bc963b-documentos-10-238e53.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR"
+    },
+    {
+      "skipped_at": "2026-03-30T18:13:48",
+      "source_pdf_path": "downloaded_pdfs\\8243e9d5-b11b-46cb-993e-468db39e9747-documentos-Atención al paciente crítico para TCAE.pdf",
+      "source_pdf_filename": "8243e9d5-b11b-46cb-993e-468db39e9747-documentos-Atención al paciente crítico para TCAE.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\8243e9d5-b11b-46cb-993e-468db39e9747-documentos-Atención al paciente crítico para TCAE.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: course_code"
+    },
+    {
+      "skipped_at": "2026-03-30T18:14:33",
+      "source_pdf_path": "downloaded_pdfs\\16603aae-0db0-4566-acb8-6213378ce4d8-documentos-pasado en siguiente año-d7484a.pdf",
+      "source_pdf_filename": "16603aae-0db0-4566-acb8-6213378ce4d8-documentos-pasado en siguiente año-d7484a.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\16603aae-0db0-4566-acb8-6213378ce4d8-documentos-pasado en siguiente año-d7484a.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: institution_name, center_search_text, start_date, end_date | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route, institution_name, start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:15:19",
+      "source_pdf_path": "downloaded_pdfs\\0fe5a0c2-1a6d-452a-95f8-b07b09b2f3ae-documentos-acmA-PROTECCION IOLENCIAGENERO-3bcac9.pdf",
+      "source_pdf_filename": "0fe5a0c2-1a6d-452a-95f8-b07b09b2f3ae-documentos-acmA-PROTECCION IOLENCIAGENERO-3bcac9.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\0fe5a0c2-1a6d-452a-95f8-b07b09b2f3ae-documentos-acmA-PROTECCION IOLENCIAGENERO-3bcac9.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: course_code"
+    },
+    {
+      "skipped_at": "2026-03-30T18:16:07",
+      "source_pdf_path": "downloaded_pdfs\\461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-18. CUIDADOS AL NIÑO EN LOS ACCIDENTES.pdf",
+      "source_pdf_filename": "461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-18. CUIDADOS AL NIÑO EN LOS ACCIDENTES.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-18. CUIDADOS AL NIÑO EN LOS ACCIDENTES.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: start_date, end_date | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:17:21",
+      "source_pdf_path": "downloaded_pdfs\\99509254-11eb-42d5-8afe-22109fdfadf8-documentos-diploma copia (8)-358816.pdf",
+      "source_pdf_filename": "99509254-11eb-42d5-8afe-22109fdfadf8-documentos-diploma copia (8)-358816.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\99509254-11eb-42d5-8afe-22109fdfadf8-documentos-diploma copia (8)-358816.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: institution_name, center_search_text, start_date, end_date | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route, institution_name, start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:18:06",
+      "source_pdf_path": "downloaded_pdfs\\1fe0b0e7-f7c6-483f-a417-5ca93ddcef52-documentos-ALIMENTACION Y NUTRICION EN EL ENTORNO SOCIOSANITARIO 2024-8ecf79.pdf",
+      "source_pdf_filename": "1fe0b0e7-f7c6-483f-a417-5ca93ddcef52-documentos-ALIMENTACION Y NUTRICION EN EL ENTORNO SOCIOSANITARIO 2024-8ecf79.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\1fe0b0e7-f7c6-483f-a417-5ca93ddcef52-documentos-ALIMENTACION Y NUTRICION EN EL ENTORNO SOCIOSANITARIO 2024-8ecf79.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: missing required fields: institution_name, center_search_text | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: institution_name"
+    },
+    {
+      "skipped_at": "2026-03-30T18:18:43",
+      "source_pdf_path": "downloaded_pdfs\\0f620dfd-ed71-4e06-872a-bb1ad15f3dd4-documentos-TRASTORNOS DEL SISTEMA CARDIOVASCULAR.pdf",
+      "source_pdf_filename": "0f620dfd-ed71-4e06-872a-bb1ad15f3dd4-documentos-TRASTORNOS DEL SISTEMA CARDIOVASCULAR.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\0f620dfd-ed71-4e06-872a-bb1ad15f3dd4-documentos-TRASTORNOS DEL SISTEMA CARDIOVASCULAR.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR"
+    },
+    {
+      "skipped_at": "2026-03-30T18:19:25",
+      "source_pdf_path": "downloaded_pdfs\\56d40f98-aad6-48ba-821a-b92fa4dc1826-documentos-740b0934-5c5a-4ca4-a0b5-51fc8845a59a-a7a670.pdf",
+      "source_pdf_filename": "56d40f98-aad6-48ba-821a-b92fa4dc1826-documentos-740b0934-5c5a-4ca4-a0b5-51fc8845a59a-a7a670.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\56d40f98-aad6-48ba-821a-b92fa4dc1826-documentos-740b0934-5c5a-4ca4-a0b5-51fc8845a59a-a7a670.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: institution_name, center_search_text | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route, institution_name"
+    },
+    {
+      "skipped_at": "2026-03-30T18:20:23",
+      "source_pdf_path": "downloaded_pdfs\\461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-11. CUIDADOS DE ENFERMERÍA EN LA URGENCIA DE.pdf",
+      "source_pdf_filename": "461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-11. CUIDADOS DE ENFERMERÍA EN LA URGENCIA DE.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\461070d4-6492-4738-9492-e9ca4b6feb7c-documentos-11. CUIDADOS DE ENFERMERÍA EN LA URGENCIA DE.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: start_date, end_date | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:46:10",
+      "source_pdf_path": "downloaded_pdfs\\108194f2-3dc1-4d00-8697-15b382b0d500-documentos-experiencia uci.pdf",
+      "source_pdf_filename": "108194f2-3dc1-4d00-8697-15b382b0d500-documentos-experiencia uci.pdf",
+      "archived_pdf_path": "skipped_pdfs\\no_text\\108194f2-3dc1-4d00-8697-15b382b0d500-documentos-experiencia uci.pdf",
+      "status": "skipped_no_text",
+      "reason": "No text could be extracted from the PDF: downloaded_pdfs\\108194f2-3dc1-4d00-8697-15b382b0d500-documentos-experiencia uci.pdf"
+    },
+    {
+      "skipped_at": "2026-03-30T18:46:10",
+      "source_pdf_path": "downloaded_pdfs\\d073b94b-d360-4965-8d86-25f9829e5e0b-documentos-reacciones alérgicas ECS-82e6ca.pdf",
+      "source_pdf_filename": "d073b94b-d360-4965-8d86-25f9829e5e0b-documentos-reacciones alérgicas ECS-82e6ca.pdf",
+      "archived_pdf_path": "skipped_pdfs\\no_text\\d073b94b-d360-4965-8d86-25f9829e5e0b-documentos-reacciones alérgicas ECS-82e6ca.pdf",
+      "status": "skipped_no_text",
+      "reason": "No text could be extracted from the PDF: downloaded_pdfs\\d073b94b-d360-4965-8d86-25f9829e5e0b-documentos-reacciones alérgicas ECS-82e6ca.pdf"
+    },
+    {
+      "skipped_at": "2026-03-30T18:58:39",
+      "source_pdf_path": "downloaded_pdfs\\45a5bf4c-16dc-46c7-8a15-66f94ad76013-documentos-Hospitalización.pdf",
+      "source_pdf_filename": "45a5bf4c-16dc-46c7-8a15-66f94ad76013-documentos-Hospitalización.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\45a5bf4c-16dc-46c7-8a15-66f94ad76013-documentos-Hospitalización.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | missing required fields: start_date, end_date | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR | CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: start_date/end_date"
+    },
+    {
+      "skipped_at": "2026-03-30T18:59:20",
+      "source_pdf_path": "downloaded_pdfs\\30c9ff3e-d2e6-4d37-8ca2-879b9b41a885-documentos-cuidados del paciente pediatrico.pdf",
+      "source_pdf_filename": "30c9ff3e-d2e6-4d37-8ca2-879b9b41a885-documentos-cuidados del paciente pediatrico.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\30c9ff3e-d2e6-4d37-8ca2-879b9b41a885-documentos-cuidados del paciente pediatrico.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: POSIBLE DOCUMENTO SOLO DE ENLACE O VALIDACION. NO CLASIFICAR NI SUBIR"
+    },
+    {
+      "skipped_at": "2026-03-30T19:00:02",
+      "source_pdf_path": "downloaded_pdfs\\a44b5196-1b8b-4be5-bf21-ba502127d3f2-documentos-Atencion al parto 150 h-cc9638.pdf",
+      "source_pdf_filename": "a44b5196-1b8b-4be5-bf21-ba502127d3f2-documentos-Atencion al parto 150 h-cc9638.pdf",
+      "archived_pdf_path": "skipped_pdfs\\no_text\\a44b5196-1b8b-4be5-bf21-ba502127d3f2-documentos-Atencion al parto 150 h-cc9638.pdf",
+      "status": "skipped_no_text",
+      "reason": "No text could be extracted from the PDF: downloaded_pdfs\\a44b5196-1b8b-4be5-bf21-ba502127d3f2-documentos-Atencion al parto 150 h-cc9638.pdf"
+    },
+    {
+      "skipped_at": "2026-03-30T19:05:33",
+      "source_pdf_path": "downloaded_pdfs\\8a99d5b2-754f-44da-b2b1-4c10bd3ee5a0-documentos-TECNICAS DE AFRONTAMIENTO DEL ESTRÉS LABORAL Y BURNOUT 22-b6553b.pdf",
+      "source_pdf_filename": "8a99d5b2-754f-44da-b2b1-4c10bd3ee5a0-documentos-TECNICAS DE AFRONTAMIENTO DEL ESTRÉS LABORAL Y BURNOUT 22-b6553b.pdf",
+      "archived_pdf_path": "skipped_pdfs\\incomplete_classification\\8a99d5b2-754f-44da-b2b1-4c10bd3ee5a0-documentos-TECNICAS DE AFRONTAMIENTO DEL ESTRÉS LABORAL Y BURNOUT 22-b6553b.pdf",
+      "status": "skipped_incomplete_classification",
+      "reason": "Incomplete/manual-review classification blocked automated upload: vec_route=manual_review | blocking alerts: CLASIFICACION INCOMPLETA: faltan campos criticos para automatizar con seguridad: vec_route"
+    }
+  ]
+}
