@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang='es'><head>
+  <meta charset='utf-8' />
+  <title>Web AEAT</title>
+	 <meta name='DESCRIPTION' content='Agencia Estatal Administracion Tributaria' />
+  <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
+
+   <link type='text/css' rel='stylesheet' href='/static_files/common/css/xzhtcs06.css' />
+  <style id='posicionamientoCSS'>.aeat-backdrop{} .js-container{}</style>
+  <meta name='theme-color' content='#fafafa' />
+<meta name="site" content="Sede" />
+<script src='/static_files/common/internet/script/sede06.js' charset="UTF-8"></script>
+<script>
+host_dirrec='/static_files/common/internet/dep/aduanas/';
+</script>
+<script src='/static_files/common/dep/aduanas/script/basicos/basicos_internet05.min.js' charset='iso-8859-15'></script>
+<script src='/static_files/common/dep/dit/script/framework.desktop.js'></script>
+</head>
+<body onload='crearListaElementos(); initHorizontalTabs(); ObtenerClaveMovilQR.startUp();' >
+<noscript><div tabindex="-1" role="dialog" class="ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable noscript" aria-describedby="title-avisoCookiesDesactivadas"><div class="ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle"><span id="title-avisoCookiesDesactivadas" class="ui-dialog-title">Aviso: Javascript no habilitado</span></div><div id="avisoCookiesDesactivadas" class="ui-dialog-content ui-widget-content noscript"><div class='AEAT_bloque_errores'><p>Para el correcto funcionamiento de la sede Electr&oacute;nica es necesario que su navegador permita la utilizaci&oacute;n de cookies y tenga habilitado el uso de javascript.</p><p>Si no sabe como hacerlo puede consultarlo en el siguiente enlace:</p><p><a class='enlace_no_decorado negrita' href='https://sede.agenciatributaria.gob.es/Sede/ayuda/consultas-informaticas/comprobaciones-tecnicas/requisitos-tecnicos-realizar-tramites-sede-electronica.html' target='blank'>Requisitos t&eacute;cnicos para realizar tr&aacute;mites en la Sede Electr&oacute;nica</a></p><p>Para mas informaci&oacute;n sobre las cookies visite la <a class='enlace_no_decorado negrita' href='https://sede.agenciatributaria.gob.es/Sede/condiciones-uso-sede-electronica/aviso-legal.html' target='blank'>pol&iacute;tica de privacidad</a>.</p></div></div></div><div class="ui-widget-overlay ui-front"></div></noscript>
+<header id='AEAT_header' class='header_aeat header_clave'>
+  <div class='header-sup_aeat w-100'>
+    <div class='container'>
+      <div class='row justify-content-between'>
+        <div id='topIzquierda' class='pl-0'>
+          <nav class='header-contLogos_aeat'>
+            <a href='https://sede.agenciatributaria.gob.es/Sede/inicio.html' title='Página de inicio' class='header-logosPrincipales_aeat'>
+              <span class='logoGobierno Sede'>Logotipo del Gobierno de España</span>
+              <span class='logoAEAT logoSite logoSede ml-2 overflow-hidden'>Logotipo de la Agencia Tributaria</span>
+            </a>
+          </nav>
+        </div>
+        <div id='topDerecha' class='d-flex align-items-center justify-content-end pr-0'>
+          <ul class='list-unstyled mb-0 d-flex align-items-center'>
+          	<li class='mr-2'>
+              <a href='https://clave.gob.es' title='' class='text-decoration-none'>
+                <span class='logoClave'>
+                  Logotipo Clave - Identidad Electrónica para las Administraciones
+                </span>
+              </a>
+          	</li>
+          	<li class='mr-2 d-none d-sm-block'>
+          		<a href='https://clave.gob.es/clave_Home/clave/queEs.html' class='small btn btn-clave py-2 text-white' target='_blank'>¿Qué es Cl@ve?</a>
+          	</li>
+          	<li class='mr-2 d-none d-lg-block'>
+          		<a href='https://clave.gob.es/clave_Home/clave.html' title='Ayuda Cl@ve' class='small btn btn-white py-2' target='_blank'>Ayuda</a>
+          	</li>
+          </ul>
+          <div id='idioma' class='dropdown js-dropdown-lang-app'>
+            <button class='btn btn-link text-secondary d-flex align-items-center cursor-pointer' type='button' role='button' id='dropdownIdiomas' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
+              <span class='js-idioma-actual' data-toggle='tooltip' title='' data-original-title='Idioma actual'>ES</span>
+              <i class='aeat-ico fa-ico-chevron-down ico-size-1 ml-2'></i>
+            </button>
+            <div id='dropdown-idioma' class='dropdown-menu dropdown-menu-right notraducir' role='combobox' aria-labelledby='dropdownIdiomas'>
+              <!--AEATP1NOTRAD-->
+              <a role='option' class='dropdown-item ' title='Català' data-lang='ca' lang='ca' hreflang='ca' aria-disabled='false' tabindex='0' aria-selected='false' href='#'>
+                Català
+              </a>
+              <a role='option' class='dropdown-item ' title='Galego' data-lang='gl' lang='gl' hreflang='gl' aria-disabled='false' tabindex='0' aria-selected='false' href='#'>
+                Galego
+              </a>
+              <a role='option' class='dropdown-item ' title='Valencià' data-lang='va' lang='ca-valencia' hreflang='ca-valencia' aria-disabled='false' tabindex='0' aria-selected='false' href='#'>
+                Valencià
+              </a>
+              <a role='option' class='dropdown-item ' title='English' data-lang='en' lang='en' hreflang='en' aria-disabled='false' tabindex='0' aria-selected='false' href='#'>
+                English
+              </a>
+              <a role='option' class='dropdown-item' title='Castellano' data-lang='es' lang='es' hreflang='es' aria-disabled='false' tabindex='0' aria-selected='false' href='#'>
+                Castellano
+              </a>
+              <!--/AEATP1NOTRAD-->
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class='w-100 bg-secondary py-2'>
+    <h1 class='h2 m-0 text-white text-center'>Autenticación por <strong>Cl@ve Móvil</strong></h1>
+  </div>
+</header>
+<div id="contenedor" class="js-container">
+<div id='AEAT_contenedor_Aplicacion'>
+<main id='AEAT_contenedor_Main'>
+<div class="AEAT_aplicacion" id="acc-main">
+<script>set_cookie('INT-MENSAJE','');</script>
+<div id='divMensajeRecarga'></div>
+<style>
+	#AEAT_contenedor_Aplicacion {
+		all: unset;
+	}
+	.AEAT_aplicacion ul {
+		all: unset;
+		width: 100%;
+	}
+	#contenedor {
+		all: unset;
+	}
+	.contenedor{
+	    display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: center;
+	}
+	.item{
+		width: 45%;
+		padding-left: 3.5rem;
+		padding-right: 3.5rem;
+		padding-top: .5rem;
+		padding-bottom: .5rem;
+		background-color: #ffffff;
+		box-shadow: 0 0.125rem 0.25rem rgba(26, 26, 26, 0.15);
+		margin: 1rem;
+	}
+	.contenedorAlineacionVerticalCentrada{
+	    display: flex;
+		align-items: center;
+	}
+	.item10{
+		width: 10%;
+		text-align: center;
+	}
+	.item90{
+		width: 90%;
+	}
+	.divAsTextarea {
+		vertical-align: middle;
+		border: 1px solid grey;
+		background-color: #f9f9f9;
+		color: rgb(95,95,95);
+		cursor: no-drop;
+		padding: 0.3em;
+	}
+	.naranjaClaveSecundario {
+		color: #C54A0A !important;
+		border-color: #C54A0A !important;
+	}
+	.naranjaClavePrincipal {
+		color: white !important;
+		border-color: #C54A0A !important;
+		background-color: #C54A0A !important;
+	}
+	.anchoInherit {
+		width: inherit;
+	}
+	.contenedorCodQR {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+	.box {
+		width: 50%;
+		box-sizing: border-box;
+	}
+	#boton-pequeno-container {
+		text-align: right;
+		margin: 0 -3rem 0.5rem 0;
+	}
+	#boton-pequeno-container > input[type="button"]{
+		font-size: 0.75em;
+		color: black;
+		border: 0;
+		padding: 0;
+		margin: 0 0rem 0.5rem 0;
+	}
+	div#divEsperarValidacionDeepLink {
+		margin: 0 0 1rem 0;
+	}
+	@media (max-width: 767.98px) {
+		.box {
+			width: 100%;
+		}
+		.contenedor{
+			flex-direction: column-reverse;
+		}
+		.item{
+			width: 93%;
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+		#boton-pequeno-container {
+			text-align: right;
+			margin: 0 0rem 0.5rem 0;
+		}
+		.contenedorAlineacionVerticalCentrada{
+			display: flex;
+			align-items: center;
+			margin: 0 0rem 0.75rem 0;
+		}
+	}
+	.fuenteTamanyo3em {
+		font-size: 3em;
+	}
+	.fuenteTamanyo125em {
+		font-size: 1.25em;
+	}
+	.fuenteTamanyo115em {
+		font-size: 1.15em;
+	}
+	.marginBottom-2em {
+		margin-bottom: -2em;
+	}
+	.textoNaranja {
+		color: #C54A0A;
+	}
+	.cuadroAccesoDNINIE {
+		padding: 0.5em;
+		border: 1px solid black;
+		background-color: #FEF4F6;
+	}
+	#elForm{
+		justify-content: space-around;
+	}
+	#divEsperaActiva > div.AEAT_bloque_botones {
+		margin: 1.3em 0;
+	}
+	#botonAccesoDeeplink{
+		margin-top: -0.5rem;
+	}
+	#divImagenLoading{
+		background-image: url('/static_files/common/internet/dep/explotacion/moviles/clave/idp/img/loading.gif');
+		width: 100%;
+		height: 110px;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 20%;
+	}
+	#divReintento{
+		margin-bottom: 3em;
+		text-align: center;
+	}
+	#divReintento a {
+		color: #C54A0A !important;
+		font-size: 1.25em;
+	}
+</style>
+<div class="contenedor">
+<div class="item">
+<div id="divRegistradoActivado" class="centrado">
+	<div id="boton-pequeno-container">
+<input type='button' id='botonCancelar'  name='botonCancelar' class='boton-pequeno' accesskey='C' value='CANCELAR'   />
+<script>
+jQuery(document).ready(function(){jQuery('#botonCancelar').on('click keypress', 
+    function(event){
+        ObtenerClaveMovilQR.cancelarPeticion();
+    }
+);});
+</script>
+	</div>
+	<div class="contenedorCodQR"marginBottom-2em">
+		<div class="box">
+			<div class="negrita" style="text-align: center;">Tiempo de caducidad de la petición</div>
+			<div class="negrita cuenta_atras fuenteTamanyo3em" aria-live="polite" style="visibility:hidden; text-align: center;"><span id="spanCuentaAtrasMinutos" ></span>:<span id="spanCuentaAtrasSegundos"></span></div>
+			<div class="negrita codigoVerificacion" style="text-align: center;">Código de verificación</div>
+			<div class="negrita codigoVerificacion fuenteTamanyo3em" style="text-align: center;"><span id="spanCodigoVerificacion" ></span></div>
+		</div>
+		<div class="box">
+			<div class="QRPeticion" style="text-align: center;"><img alt="Código QR para la petición de autenticación con Cl@ve Móvil" id="imgQRAcceso"></img></div>
+			<p class="fuenteTamanyo115em textoNaranja" style="text-align: center;">Escanear con APP Cl@ve</p>
+		</div>
+	</div>
+	<div id="contenedorInputs" class="sinborde bloque_100" >
+<br />
+<form id='elForm' method='post' class="fondo_blanco">
+<span class="ancho_100 marginBottom-2em" >
+Organismo solicitante
+<br />
+<div id="inputOrganismoReadonly" class="negrita ancho_100 divAsTextarea"></div>
+</span>
+<input type="hidden" name="hiddenTokenClaveMovil" id="hiddenTokenClaveMovil" >
+<input type="hidden" name="hiddenURLRef" id="hiddenURLRef" >
+<input type="hidden" name="hiddenFrom" id="hiddenFrom" >
+</form>
+	</div>
+<br />
+	<div class="contenedorCodQR">
+		<div>
+		<ul>
+<li><p class="fuenteTamanyo125em">1. Abra la <span class="negrita">APP Cl@ve.</span> <a href="https://sede.agenciatributaria.gob.es/Sede/ayuda/app-clave.html">¿No la tiene instalada?</a> </p></li>
+<li><p class="fuenteTamanyo125em">2. Pulse en <span class="negrita">escanear código QR</span>. </p></li>
+<li><p class="fuenteTamanyo125em">3. Apunte la cámara hacia esta pantalla para escanear el código QR. </p></li>
+<li><p class="fuenteTamanyo125em">4. Confirme la petición de autenticación en la APP. </p></li>
+<li><p class="fuenteTamanyo125em">5. No cierre esta página, en unos segundos se le redirigirá automáticamente. </p></li>
+		</ul>
+<div class="cuadroAccesoDNINIE">
+<span class="fuenteTamanyo125em"> <span class="negrita">Si no puede acceder escaneando el código QR con la APP Cl@ve,</span> también puede <a href="https://www12.agenciatributaria.gob.es/wlpl/MOVI-P24H/ObtenerClaveMovil?qAA=3&relayState=7eea3fc06161a6df197071e201b6e85d&ref=https%3A%2F%2Fwww2.agenciatributaria.gob.es%2Fwlpl%2FSEII-SAML%2FReturnClave&storksp=A01025784&from=stork&authnNIFLM=&ts=20260318092016862976">continuar con la autenticación por Cl@ve móvil sin lectura del QR.</a></span>
+</div>
+		</div>
+<br />
+		<div id="divEsperaActiva" class="ancho_100" >
+		</div>
+	</div>
+	<div id="divFinTiempo" style="display:none;">
+		<ul>
+<li><p class="fuenteTamanyo125em"><span class="negrita">La petición de autenticación con Cl@ve Móvil ha caducado.</span> Han transcurrido más de 5 minutos desde que la solicitó. </p></li>
+<li><p class="fuenteTamanyo125em">Pulse en CONTINUAR si desea solicitar otra petición de autenticación. </p></li>
+		</ul>
+<div class='AEAT_bloque_botones ancho_100'>
+<input type='button' id='botonRecargarPagina1'  name='botonRecargarPagina1' class='anchoInherit naranjaClavePrincipal' accesskey='C' value='CONTINUAR'   />
+<script>
+jQuery(document).ready(function(){jQuery('#botonRecargarPagina1').on('click keypress', 
+    function(event){
+        location.reload();
+    }
+);});
+</script>
+</div>
+	</div>
+	<div id="divErrorPeticionAutenticacion" style="display:none;">
+		<ul>
+<li><p class="fuenteTamanyo125em"><span id="spanMensajeError" ></span> </p></li>
+<li><p class="fuenteTamanyo125em">Pulse en CONTINUAR si desea solicitar otra petición de autenticación. </p></li>
+		</ul>
+<div class='AEAT_bloque_botones ancho_100'>
+<input type='button' id='botonRecargarPagina3'  name='botonRecargarPagina3' class='anchoInherit naranjaClavePrincipal' accesskey='C' value='CONTINUAR'   />
+<script>
+jQuery(document).ready(function(){jQuery('#botonRecargarPagina3').on('click keypress', 
+    function(event){
+        location.reload();
+    }
+);});
+</script>
+</div>
+	</div>
+</div>
+</div>
+</div>
+<script>
+var stopClickToCall = true;
+var Constantes = {};
+Constantes.URL_SERVLET = 'https://www2.agenciatributaria.gob.es/wlpl/MOVI-P24H/ObtenerClaveMovilQR';
+Constantes.URL_SERVLET_VALIDAR_PETICION = 'https://www2.agenciatributaria.gob.es/wlpl/MOVI-P24H/ValidarClaveMovilQR';
+Constantes.URL_SERVLET_CANCELAR_PETICION = 'https://www2.agenciatributaria.gob.es/wlpl/MOVI-P24H/CancelarClaveMovilQR';
+Constantes.URL_SERVLET_CADUCAR_PETICION = 'https://www2.agenciatributaria.gob.es/wlpl/MOVI-P24H/CaducarClaveMovilQR';
+Constantes.SIMULACION = false;
+Constantes.ID_FORM ='elForm';
+Constantes.ID_SPAN_CUENTA_ATRAS_MINUTOS ='spanCuentaAtrasMinutos';
+Constantes.ID_SPAN_CUENTA_ATRAS_SEGUNDOS ='spanCuentaAtrasSegundos';
+Constantes.ID_SPAN_CODIGO_VERIFICACION ='spanCodigoVerificacion';
+Constantes.ID_SPAN_MENSAJE_ERROR ='spanMensajeError';
+Constantes.ID_DIV_REGISTRADO_ACTIVADO ='divRegistradoActivado';
+Constantes.ID_DIV_FIN_TIEMPO ='divFinTiempo';
+Constantes.ID_DIV_ERROR_PETICION_AUTENTICACION ='divErrorPeticionAutenticacion';
+Constantes.ID_DIV_DIALOGO_PROBLEMAS_ACCESO_DEEPLINK ='divDialogoProblemasAccesoDeeplink';
+Constantes.ID_DIV_IMAGEN_LOADING ='divImagenLoading';
+Constantes.ID_DIV_REINTENTO ='divReintento';
+Constantes.ID_DIV_ESPERAR_VALIDACION_DEEPLINK ='divEsperarValidacionDeepLink';
+Constantes.ID_HIDDEN_STORKSP ='hiddenStorksp';
+Constantes.ID_HIDDEN_TOKEN_CLAVE_MOVIL ='hiddenTokenClaveMovil';
+Constantes.ID_HIDDEN_URL_REF ='hiddenURLRef';
+Constantes.ID_HIDDEN_FROM ='hiddenFrom';
+Constantes.ID_IMG_QR_ACCESO ='imgQRAcceso';
+Constantes.ID_INPUT_ORGANISMO_READONLY ='inputOrganismoReadonly';
+Constantes.ID_BOTON_CANCELAR ='botonCancelar';
+Constantes.ID_BOTON_ACCESO_DEEPLINK ='botonAccesoDeeplink';
+Constantes.KEY_JSON_ESTADO_PETICION ='estadoPeticion';
+Constantes.KEY_JSON_MENSAJE_RESPUESTA ='mensajeRespuesta';
+Constantes.KEY_JSON_URL_REDIRECCION ='urlRef';
+Constantes.KEY_STORKSP ='storksp';
+Constantes.KEY_FROM ='from';
+Constantes.KEY_REFERENCIA ='ref';
+Constantes.KEY_CODIGO_VERIFICACION ='codigoVerificacion';
+Constantes.KEY_FECHA_CADUCIDAD ='fc';
+Constantes.KEY_TOKEN_CLAVE_MOVIL ='tokenClaveMovil';
+Constantes.KEY_TOKEN_CLAVE_MOVIL_CIFRADO ='tokenClaveMovilCifrado';
+Constantes.LITERAL_ERROR_PETICION_CANCELADA ='<span class=\"negrita\">El usuario ha cancelado el proceso de petición de autenticación con Cl@ve Móvil.</span>';
+Constantes.LITERAL_ERROR_PETICION_CADUCADA ='La petición de autenticación con Cl@ve Móvil ha caducado. Por favor, reinténtelo de nuevo';
+Constantes.LITERAL_TITULO_TAB_CLAVE_MOVIL ='Cl@ve Móvil';
+Constantes.ERROR_IDP_PETICION_CADUCADA_TEMPORIZADOR ='902023';
+Constantes.ERROR_IDP_PETICION_VIVA ='902028';
+Constantes.LITERAL_STORK ='stork';
+Constantes.URL_DEEPLINK_ACCESO_DATOS_QR ='https://sede.agenciatributaria.gob.es/appclave/qrscan?qrcode=';
+Constantes.ID_DIV_TIENE_PROBLEMAS ='tieneProblemas';
+Constantes.CLASS_DIV_CONTENEDOR_QR ='contenedorCodQR';
+Constantes.INTERVALO_LLAMADA_AJAX = 6;
+</script>
+<script type='text/javascript' src='/static_files/common/internet/dep/explotacion/moviles/clave/idp/js/visibility.js' ></script>
+<script type='text/javascript' src='/static_files/common/internet/dep/explotacion/moviles/clave/idp/js/obtenerclavemovilqr.js' ></script>
+<script type='text/javascript' src='/static_files/common/internet/dep/explotacion/moviles/clave/idp/js/obtenerclavemovilqr.ajax.js' ></script>
+</div>
+</main>
+</div>
+</div>
+<footer class='bg-secondary border-top border-size-3 border-clave js-aeat-pie'>
+	<div class='container'>
+		<div class='row m-0'>
+			<div class='col-2 d-none d-md-flex py-3'>
+				<span class='logoClave'>
+					Logotipo Clave - Identidad Electrónica para las Administraciones
+				</span>
+			</div>
+			<div class='col d-sm-flex w-100 justify-content-end py-3'>
+				<ul class='list-unstyled d-sm-flex mb-0 small text-center text-sm-left align-items-start'>
+					<li class='mr-sm-2 mb-2 pr-2 border-0 border-sm-right border-right-white'>
+						<a href='https://sede.agenciatributaria.gob.es/Sede/condiciones-uso-sede-electronica/accesibilidad/declaracion-accesibilidad.html' title='Accesibilidad' class='text-white'>Accesibilidad</a>
+					</li>
+					<li class='mr-sm-2 mb-2 pr-2 border-0 border-sm-right border-right-white'>
+						<a href='https://sede.agenciatributaria.gob.es/Sede/condiciones-uso-sede-electronica/aviso-seguridad.html' title='Aviso de seguridad' class='text-white'>Aviso de seguridad</a>
+					</li>
+					<li class='mr-sm-2 mb-2 pr-2 border-0 border-sm-right border-right-white'>
+						<a href='https://sede.agenciatributaria.gob.es/Sede/condiciones-uso-sede-electronica/aviso-legal.html' title='Aviso Legal' class='text-white'>Aviso Legal</a>
+					</li>
+					<li>
+						<a href='https://sede.agenciatributaria.gob.es/Sede/condiciones-uso-sede-electronica/datos-personales.html' title='Datos personales' class='text-white'>Datos personales</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class='row m-0'>
+			<div class='col-12 border-top border-top-white'>
+				<p class='small py-2 text-white'>&copy;2014 Cl@ve - Identidad Electr&oacute;nica para las Administraciones - Gobierno de España</p>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class='d-none'>
+	<span class='js-responsive d-xs-block'></span>
+	<span class='js-responsive d-sm-block'></span>
+	<span class='js-responsive d-md-block'></span>
+	<span class='js-responsive d-lg-block'></span>
+	<span class='js-responsive d-xl-block'></span>
+	<span class='js-responsive d-xxl-block'></span>
+	<span class='js-responsive d-xxxl-block'></span>
+</div>
+</body></html>

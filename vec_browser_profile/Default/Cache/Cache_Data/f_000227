@@ -1,0 +1,411 @@
+(function ($, Drupal, drupalSettings) {
+  Drupal.behaviors.mapasFarmacia = {
+    attach: function (context, settings) {
+      generamapa(null, null);
+
+      function generamapa(selector, mapasvg) {
+        var s;
+        if (!selector) { //No se especifica la tabla, todas las de mapas
+          s = 'table[data-gtipo="mapa"]';
+        } else {
+          s = selector;
+        }
+        s = s + ':not([data-procesada="true"])';
+        $(s).each(function () {
+          if ($(this).prop("tagName") == 'TABLE') {
+            $(this).attr('data-procesada', "true");
+            var tipomapa = $(this).attr("data-gtipomap");
+            var ocultar = $(this).attr("data-ocultar") != "false";
+            if (ocultar) {
+              $(this).hide();
+            }
+            var nColumns = countColumns($(this));
+            var datos = {};
+            datos['maximo'] = Number.NEGATIVE_INFINITY;
+            datos['minimo'] = Number.POSITIVE_INFINITY;
+            var sep_dec = '.';
+            if ($(this).attr('data-decimales')) {
+              sep_dec = $(this).attr('data-decimales');
+            }
+            var decplaces = 2;
+            if ($(this).attr('data-ndecimales')) {
+              decplaces = $(this).attr('data-ndecimales');
+            }
+            //datos[filas][0]
+            //nrow : nombre de la fila (el nombre de la zona = Centro)
+            //idzona : identificador del path
+            //datos[columnas][0]
+            //dcol : datos de la columna [tantos como filas haya]  : es ref a cel
+            //ncol : nombre de la columna (es el año correspondiente)
+            //ccol : selectores jq [tantos como filas haya]
+            //datos[celdas][fila][columna] datos de la celda : (un nrow, un ncel, "valor", "value", color, path )
+            var filas = $(this).find('tbody tr');
+            datos['filas'] = new Array();
+            datos['columnas'] = new Array();
+            datos['celdas'] = new Array();
+            for (var f = 0; f < filas.length; f++) {
+              datos['celdas'][f] = new Array();
+              datos['filas'][f] = {};
+              datos['filas'][f]['nrow'] = $(filas[f]).children(':first-child').first().text();
+              if ($(filas[f]).attr('data-idzona')) {
+                datos['filas'][f]['idzona'] = $(filas[f]).attr('data-idzona');
+              } else {
+                datos['filas'][f]['idzona'] = '';
+              }
+            }
+            var filacolumnas = $(this).find('thead tr[data-header]');
+            if (!(filacolumnas.length)) { //No encontrada, seleccionar
+              filacolumnas = $(this).find('thead tr');
+              if (filacolumnas.length == 1) {
+                filacolumnas = filacolumnas[filacolumnas.length - 1];
+              } else if (filacolumnas.length > 1) {
+                filacolumnas = filacolumnas[filacolumnas.length - 1];
+                //TODO: la que tenga mas celdas
+              } else {
+                //No hay!!
+                return;
+              }
+            } else { //
+              filacolumnas = filacolumnas[filacolumnas.length - 1];
+            }
+            var columnas = $(filacolumnas).find('th,td');
+            //La primera es encabezado
+            for (var c = 1; c < columnas.length; c++) {
+              datos['columnas'][c - 1] = {};
+              datos['columnas'][c - 1]['ncol'] = $(columnas[c]).text();
+            }
+            var caption = $(this).find('caption').text();
+            var unidad = $(this).attr("data-unidad");
+            if (!unidad) {
+              unidad = '';
+            }
+
+            var suffix = $(this).attr('data-suffix');
+            if (!suffix) {
+              suffix = '';
+            }
+
+
+            datos['cellrefs'] = {};
+            for (var f = 0; f < filas.length; f++) {
+              var celdas = $(filas[f]).find('th,td');
+              for (var c = 1; c < columnas.length; c++) {
+                var cellid = idGenerator();
+                datos['celdas'][f][c - 1] = {};
+                datos['celdas'][f][c - 1]['cellid'] = cellid;
+                $(celdas[c]).attr("data-cellid", cellid);
+                datos['celdas'][f][c - 1]['idzona'] = datos['filas'][f]['idzona'];
+                datos['celdas'][f][c - 1]['ncol'] = datos['columnas'][c - 1]['ncol'];
+                datos['celdas'][f][c - 1]['nrow'] = datos['filas'][f]['nrow'];
+                datos['celdas'][f][c - 1]['textvalue'] = $(celdas[c]).text();
+                if ($(celdas[c]).attr('data-value')) {
+                  datos['celdas'][f][c - 1]['value'] = numval($(celdas[c]).attr('data-value'), sep_dec);
+                } else {
+                  datos['celdas'][f][c - 1]['value'] = numval($(celdas[c]).text(), sep_dec);
+                }
+                if (!isNaN(datos['celdas'][f][c - 1]['value'])) {
+                  if (datos['celdas'][f][c - 1]['value'] > datos['maximo']) {
+                    datos['maximo'] = datos['celdas'][f][c - 1]['value'];
+                  }
+                  if (datos['celdas'][f][c - 1]['value'] < datos['minimo']) {
+                    datos['minimo'] = datos['celdas'][f][c - 1]['value'];
+                  }
+                }
+                var tooltipval = datos['celdas'][f][c - 1]['textvalue'];
+                if ($(celdas[c]).attr('data-tooltipvalue')) {
+                  tooltipval = $(celdas[c]).attr('data-tooltipvalue');
+                }
+                //tooltip
+                //var tooltip='<span>'+caption+'<br/>'+ datos['celdas'][f][c-1]['nrow']+', '+datos['celdas'][f][c-1]['ncol']+'</span><span style="float:right">'+tooltipval+' '+unidad+'</span>';
+                var tooltip = '<span>' + datos['celdas'][f][c - 1]['nrow'] + '</span><br /><span>' + unidad + tooltipval + suffix + '</span>';
+                if ($(celdas[c]).attr('data-tooltip')) {
+                  tooltip = decodeURIComponent($(celdas[c]).attr('data-tooltip'));
+                }
+                datos['celdas'][f][c - 1]['tooltip'] = tooltip;
+                datos['cellrefs'][cellid] = datos['celdas'][f][c - 1];
+              }
+            }
+            //Ya estan procesados los datos. Ahora insertamos mapa...
+
+            var id = idGenerator();
+            var idh = idGenerator();
+            $(this).attr("data-grafico", id);
+            $(this).wrap('<div class="gwrapper ' + tipomapa + '" data-grafico="' + id + '"></div>');
+            var svg;
+            var pie;
+            if (mapasvg) {
+              svg = $(mapasvg + " > svg");
+            } else {
+              svg = $('#mapadistritos > svg');
+            }
+            if (mapasvg) {
+              pie = $(mapasvg + " > .piemapa");
+            } else {
+              pie = $('#mapadistritos > .piemapa');
+            }
+            if (!svg.length) {
+              return;
+            }
+            var m = svg.clone();
+            m.attr('id', id);
+            m.addClass('mapa');
+            $(this).after(m);
+
+
+            //Botonera de series por columnas
+            var html = $('<div class="botoneramapa" data-mapa="' + id + '" data-html="' + idh + '"></div>');
+            for (var i = 0; i < datos['columnas'].length; i++) {
+              html.append('<div class="boton" data-mapa="' + id + '" data-html="' + idh + '" data-coldata="' + i + '">' + datos['columnas'][i]['ncol'] + '</div>');
+            }
+            var barra = $('<div class="barracolores"></div>');
+            //Obtener rangos
+            var str_rangos = $(this).attr("data-rangos");
+            var arr_rangos = str_rangos.split('|');
+            var str_colores = $(this).attr("data-rangos-color");
+            var arr_colores = str_colores.split('|');
+            var str_leyenda = $(this).attr("data-rangos-label");
+            var arr_leyenda = str_leyenda.split('|');
+            if (arr_rangos.length != arr_colores.length || arr_colores.length != arr_leyenda.length) {
+              console.log("ERR definicion rangos");
+              return;
+            }
+            var pasos = arr_rangos.length;
+            var w = 20 / pasos;
+            w = (Math.floor(w * 1000)) / 1000;
+            //barra.append('<div class="minimo">'+datos['minimo'].toFixed(decplaces)+'</div>');
+
+            var rangos = new Array();
+            for (var i = 0; i < pasos; i++) {
+              var tk = arr_rangos[i].split(',');
+              var rango = {};
+              rango['ini'] = tk[0];
+              rango['fin'] = tk[1];
+              rango['iniop'] = tk[0].substr(0, 1);
+              rango['finop'] = tk[1].substr(tk[1].length - 1);
+              if (tk[0].length == 1) {
+                rango['inival'] = "inf";
+              } else {
+                rango['inival'] = 1 * tk[0].substr(1);
+              }
+              if (tk[1].length == 1) {
+                rango['finval'] = "inf";
+              } else {
+                rango['finval'] = 1 * tk[1].substr(0, tk[1].length - 1);
+              }
+              rangos[i] = rango;
+            }
+            var labeled = '';
+            if (pasos < 6) {
+              labeled = "label";
+            }
+            for (var i = 0; i < pasos; i++) {
+              barra.append('<div class="label m m_' + i + '" style="background-color:' + arr_colores[i] + '" data-v="' + arr_leyenda[i] + '"></div>');
+              //barra.append('<div class="label m m_'+i+'" style="width:'+w+'rem;background-color:'+ arr_colores[i] +'" data-v="'+arr_leyenda[i] +'"></div>');
+            }
+            for (var f = 0; f < datos['celdas'].length; f++) {
+              for (var c = 0; c < datos['celdas'][f].length; c++) {
+                var v = aplicarango(datos['celdas'][f][c]['value'], rangos);
+                if (v > 0) {
+                  datos['celdas'][f][c]['color'] = arr_colores[v - 1];
+                } else { //negro
+                  datos['celdas'][f][c]['color'] = "#0000ff";
+                }
+              }
+            }
+            //barra.append('<div class="maximo">'+datos['maximo'].toFixed(decplaces)+'</div><div class="slider"></div>');
+            html.append(barra);
+            $(this).after(html);
+            if (pie.length) {
+              piemapa = pie.clone();
+              piemapa.attr('id', idh);
+              piemapa.addClass('piemapa');
+              $(m).after(piemapa);
+            }
+            //Quito el max-height para que no se desplace en pantallas medianas.
+            $('.gwrapper .mapa').css('max-height', '100%');
+
+            //Añadir reacciones botonera:
+            $('.botoneramapa .boton[data-mapa="' + id + '"]').click(function () {
+              $(this).siblings().removeClass("activo");
+              $(this).addClass("activo");
+              var columna = $(this).attr('data-coldata');
+              var idmapa = $(this).attr('data-mapa');
+              var idhtml = $(this).attr('data-html');
+              $('div.gwrapper[data-grafico="' + id + '"]').css('position', 'relative');
+              for (var f = 0; f < datos['filas'].length; f++) {
+                if (datos['celdas'][f][columna]['idzona'] != 'pie') {
+                  $('#' + idmapa + ' ' + datos['celdas'][f][columna]['idzona']).attr("fill", datos['celdas'][f][columna]['color']);
+                  $('#' + idmapa + ' ' + datos['celdas'][f][columna]['idzona']).attr("data-cellref", datos['celdas'][f][columna]['cellid']);
+                  var div = $('div[data-maphoverinfo="' + datos['celdas'][f][columna]['cellid'] + '"]');
+                  if (div.length < 1) { //Creamos si no existe
+                    div = $('<div></div>');
+                    div.attr('data-maphoverinfo', datos['celdas'][f][columna]['cellid']);
+                    div.addClass("maptooltip");
+                    //$('body').append(div);
+                    $('#' + id).after(div);
+                  }
+                  div.empty();
+                  div.append(datos['celdas'][f][columna]['tooltip']);
+                } else {
+                  $('#' + idhtml + ' .value').html(datos['celdas'][f][columna]['value']);
+                  $('#' + idhtml + ' .textvalue').html(datos['celdas'][f][columna]['textvalue']);
+                  $('#' + idhtml + ' .nrow').html(datos['celdas'][f][columna]['nrow']);
+                  $('#' + idhtml + ' .ncol').html(datos['celdas'][f][columna]['ncol']);
+                }
+              }
+              //coldata para hmtl
+
+              //Añadir reacciones hover:
+              $('#' + idmapa + ' [data-cellref]').off("mouseenter");
+              $('#' + idmapa + ' [data-cellref]').off("mouseleave");
+              $('#' + idmapa + ' [data-cellref]').hover(
+                //Mouseenter
+                function (e) {
+                  var t = $(this);
+                  var cellref = t.attr('data-cellref');
+                  //version "movil"
+                  var screenwidth = $(window).width() / parseFloat($("body").css("font-size"));
+                  //console.log(screenwidth);
+                  if (screenwidth < 27) { //Tooltip al pie
+                    $('[data-maphoverinfo="' + cellref + '"]').addClass("activo");
+                    $('[data-maphoverinfo="' + cellref + '"]').css("width", '90%');
+                    $('[data-maphoverinfo="' + cellref + '"]').css("max-width", '90%');
+                    $('[data-maphoverinfo="' + cellref + '"]').css("position", 'static');
+                    return;
+                  }
+                  //Version "normal"
+                  $('[data-maphoverinfo="' + cellref + '"]').css("width", '');
+                  $('[data-maphoverinfo="' + cellref + '"]').css("max-width", '');
+                  $('[data-maphoverinfo="' + cellref + '"]').css("position", '');
+                  var position = t.position();
+                  $('.botoneramapa[data-mapa="' + id + '"] .barracolores .m.' + datos['cellrefs'][cellref]['marca']).addClass('marca')
+                  //$('[data-cellref="'+cellref+'"]').parent().addClass("activeRow");
+                  //$('[data-cellref="'+cellref+'"]').addClass("maphover");
+                  $('[data-maphoverinfo="' + cellref + '"]').addClass("activo");
+                  //var y = Math.floor(position.top + (t[0].getBoundingClientRect().height / 2) - ($('[data-maphoverinfo="'+cellref+'"]').height() / 2));
+                  //relativo a la caja
+                  var caja = $(this).closest('svg');
+                  cajapos = caja.offset();
+                  cajay = cajapos.top;
+                  cajax = cajapos.left;
+                  botonera = $('path[data-cellref='+ cellref +']');
+                  var y = Math.floor(position.top - cajay + $(botonera).height() + (t[0].getBoundingClientRect().height / 2) - ($('[data-maphoverinfo="' + cellref + '"]').height() / 2));
+
+                  console.log(Math.abs(cajay - caja.height()) + 80);
+                  console.log(y);
+
+                  if(y < Math.abs(cajay - caja.height()) + 80){
+                    y = y + cajay/15;
+                  }else{
+                    y = y - cajay / 20;
+                  }
+
+                  $('[data-maphoverinfo="' + cellref + '"]').css("top", y * 1.2);
+                  // var x = (position.left/2) + t[0].getBoundingClientRect().with;
+                  var x = Math.floor(position.left - cajax + $(botonera).width() + (t[0].getBoundingClientRect().width / 2) - ($('[data-maphoverinfo="' + cellref + '"]').width() / 2));
+                  //if( (x + $('[data-maphoverinfo="'+cellref+'"]').outerWidth()) > $(this).closest('.gwrapper').width() ){
+                  /*if ((x + $('[data-maphoverinfo="' + cellref + '"]').outerWidth()) > $('body').width()) {
+                    x = position.left - $('[data-maphoverinfo="' + cellref + '"]').outerWidth();
+                  }*/
+
+                  if (x < cajax / caja.width()) {
+                    x = cajax / caja.width();
+                  }else{
+                    x = x - 100;
+                  }
+
+                  $('[data-maphoverinfo="' + cellref + '"]').css("left", x);
+                }, //Mouseleave
+                function () {
+                  var cellref = $(this).attr('data-cellref');
+                  $('.botoneramapa[data-mapa="' + id + '"] .barracolores .m.marca').removeClass('marca');
+                  $('[data-cellref="' + cellref + '"]').removeClass("maphover");
+                  $('[data-cellref="' + cellref + '"]').parent().removeClass("activeRow");
+                  $('[data-maphoverinfo="' + cellref + '"]').removeClass("activo");
+                }
+              );
+            });
+            //Activamos la ultima serie
+            $('.botoneramapa .boton[data-mapa="' + id + '"]').last().click();
+
+          }
+        });
+        /** Funciones auxiliares **/
+
+        function aplicarango(v, r) {
+          for (var i = 0; i < r.length; i++) {
+            var rmin = false;
+            if (i == 0 && r[i]['inival'] == 'inf') {
+              rmin = true;
+            } else {
+              if (r[i]['iniop'] == "[") {
+                if (v >= r[i]['inival']) {
+                  rmin = true;
+                }
+              } else if (r[i]['iniop'] == "(") {
+                if (v > r[i]['inival']) {
+                  rmin = true;
+                }
+              }
+            }
+            if (rmin) {
+              if (i == (r.length - 1) && r[i]['finval'] == 'inf') {
+                return i + 1;
+              } else {
+                if (r[i]['finop'] == "]") {
+                  if (v <= r[i]['finval']) {
+                    return i + 1;
+                  }
+                } else if (r[i]['finop'] == ")") {
+                  if (v < r[i]['finval']) {
+                    return i + 1;
+                  }
+                }
+              }
+            }
+          }
+          return 0;
+        }
+
+        function countColumns(jqTable) {
+          var rows = jqTable.find('tr');
+          var numcols = 0;
+          for (var i = 0; i < rows.length; i++) {
+            var n = ($(rows[i]).find('td, th')).length;
+            numcols = n > numcols ? n : numcols;
+          }
+          return numcols
+        }
+
+        function numval(numero, sep_decimales) {
+          var out = '';
+          var input = numero.split('');
+          for (var i = 0; i < input.length; i++) {
+            if (('0123456789eE-+').indexOf(input[i]) > -1) {
+              out = out + '' + input[i];
+            } else if (input[i] == sep_decimales) {
+              out = out + '.';
+            }
+          }
+          return 1 * out;
+        }
+
+        function idGenerator() {
+          if (typeof window.gincremento == 'undefined') {
+            window.gincremento = 1;
+          } else {
+            window.gincremento = 1 * window.gincremento;
+          }
+          window.gincremento = window.gincremento + 1;
+          var S4 = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+          };
+          return ("G_" + window.gincremento + "_" + S4() + S4() + S4());
+        }
+      }
+
+
+    }
+  }
+
+})(jQuery, Drupal, drupalSettings);

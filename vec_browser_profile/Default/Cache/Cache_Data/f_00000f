@@ -1,0 +1,402 @@
+//Arreglo listas de espera
+if (jQuery('.view-dr-listas-espera.lista-espera').length) {
+ jQuery('.view-dr-listas-espera.lista-espera .view-header .mapa-andalucia').last().hide();
+ jQuery('.view-dr-listas-espera.lista-espera .view-header .item-list').last().hide();
+}
+//Fin arreglo listas de espera
+
+//Prestación ortoprotésica
+jQuery(".view-prestacion-ortoprotesica-establecimientos-colaboradores form option[value='3163']").remove();
+jQuery(document).ready(function() {
+  var opcion = jQuery('.view-prestacion-ortoprotesica-establecimientos-colaboradores .js-form-item-field-tipo-establecimiento-target-id select option[value="All"]');
+  opcion.text('- Todos -');
+});
+jQuery(document).ready(function() {
+  var opcion = jQuery('.view-prestacion-ortoprotesica-establecimientos-colaboradores .js-form-item-term-node-tid-depth select option[value="All"]');
+  opcion.text('- Todas -');
+});
+//Fin prestación ortoprotésica
+
+// Redirección de las unidades de gestión sanitarias enlazadas desde los centros
+var url = window.location.href;
+if(url.indexOf('el-sas/servicios-y-centros/detalle-unidad-gestion-sanitaria') !== -1){
+  window.location.href = '/servicioandaluzdesalud/el-sas/servicios-y-centros/unidades-gestion-sanitaria';
+}
+jQuery('a.center-extra_data__link').each(function(i){
+    if(this.href.indexOf('el-sas/servicios-y-centros/detalle-unidad-gestion-sanitaria') !== -1){
+    this.href = 'https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/el-sas/servicios-y-centros/unidades-gestion-sanitaria';
+    }
+});
+// Fin redirección de las unidades de gestión sanitarias enlazadas desde los centros
+
+// Arreglo filtro detalle de categoria nuevas OEP
+jQuery(window).on("load", function () {
+
+  var path = window.location.pathname;
+
+  function eliminarLista(valuesToRemove) {
+    for (var i = 0; i < valuesToRemove.length; i++) {
+      jQuery(".view-ope-detalle-categoria .js-form-item-field-ope-fase-target-id select option[value='" + valuesToRemove[i] + "']").remove();
+    }
+  }
+
+  function aplicarFiltro() {
+    var arr = [
+      "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/convocatorias-oep-2021-22",
+      "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/oep-2016-2017-estabilizacion",
+      "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/convocatorias-oep-2025/cuadro-de-evolucion/",     "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/oep-extraordinaria-decreto-ley-122022-apes-extintas/cuadro-de-evolucion-concurso-oposicion-apes-extintas", "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/oep-extraordinaria-decreto-ley-122022-centros-sas/cuadro-de-evolucion-concurso-oposicion-centros-sas",
+      "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/concurso-puestos-de-dificil-cobertura-2025/cuadro-de-evolucion/","/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/oep-extraordinaria-decreto-ley-122022-apes-extintas/cuadro-de-evolucion-concurso-apes-extintas", "/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/oep-extraordinaria-decreto-ley-122022-centros-sas/cuadro-de-evolucion-concurso-centros-sas"
+    ];
+
+    var values  = ["13484", "13485", "13486", "13487", "13488"];
+    var values1 = ["7416", "7417", "7413", "7414", "7415", "11021", "11162", "13485", "13486", "12437", "11784"];
+    var values2 = ["7416", "7417", "7413", "7414", "7415", "11021", "11162"];
+
+    for (var i = 0; i < arr.length; i++) {
+      if (path.indexOf(arr[i]) !== -1) {
+        if (i <= 4) eliminarLista(values);
+        if (i === 5) eliminarLista(values1);
+        if (i >= 6) eliminarLista(values2);
+        break;
+      }
+    }
+  }
+
+  aplicarFiltro();
+  jQuery(document).ajaxSuccess(function () {
+    aplicarFiltro();
+  });
+});
+// Fin arreglo filtro detalle de categoria nuevas OEP
+
+
+//Solucion temporal botones de cookies en politica de cookies
+		  if(jQuery("#okey_cookies").length !=0){ var date=new Date(); var lifetime=parseInt(drupalSettings.eu_cookie_compliance.cookie_lifetime); date.setDate(date.getDate() + lifetime); var cookieName="cookie-agreed" ; var path=drupalSettings.path.baseUrl; if (path.length> 1) {
+          var pathEnd = path.length - 1;
+          if (path.lastIndexOf('/') === pathEnd) {
+            path = path.substring(0, pathEnd);
+          }
+        }
+        jQuery("#cookies_aceptar").once().on('click', function() {
+          Cookies.set(cookieName, 2, {
+            expires: date,
+            path: path
+          });
+          document.getElementById('okey_cookies').style = 'display:block';
+          document.getElementById('den_cookies').style = 'display:block';
+          document.getElementById('confirmar_cookies').style = 'display:none';
+          if (jQuery("#sliding-popup").length) {
+            document.getElementById('sliding-popup').style = 'display:none';
+          }
+        });
+        jQuery("#cookies_rechazo").once().on('click', function() {
+          Cookies.set(cookieName, 0, {
+            expires: date,
+            path: path
+          });
+          document.getElementById('den_cookies').style = 'display:none';
+          document.getElementById('confirmar_cookies').style = 'display:block';
+        });
+}
+//Fin solucion temporal politica de cookies
+
+// Contador de visitas
+/**
+ * @file
+ * Global utilities.
+ *
+ */
+(function($, Drupal) {
+
+  'use strict';
+  $(document).ready(function() {
+      if (!$('#block-sastweakblock').length) {
+        if (0 || window.location.pathname  == '/servicioandaluzdesalud/proveedores/contratacion-publica/compra-publica-de-innovacion/diagnostico-y-tratamiento-de-precision-en-enfermedades-infecciosas-y-cancer-asurant-y-biopsia') {
+          let html = '<div class="region region-pre-bottom added-counter"><div id="block-sastweakblock" class="contextual-region block block-sas-tweak block-sas-tweak-block" data-nosnippet=""><div class="content"><p style="font-size: 14px; text-align: right;">Número de visitas:<span id="numberVisits"> </span></p></div></div></div>';
+          $('#pre-bottom').append(html);
+        }
+      }
+      if ($('#block-sastweakblock').length && $('.added-counter').length) {
+        var url = window.location.pathname;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var nvis = this.responseText.split(";");
+            if(nvis[1] == -1){
+              $('#numberVisits').closest("#block-sastweakblock").html('');
+            }
+            else{
+              $('#numberVisits').text(" "+nvis[1])
+            }
+          }
+        };
+        xhttp.open("GET", "/servicioandaluzdesalud/api/contador-visitas?sec=" + url, true);
+        xhttp.send();
+      }
+   });
+
+})(jQuery, Drupal);
+// Fin contador de visitas
+
+// Arreglo Plantilla Media Centros Sanitarios
+document.addEventListener("DOMContentLoaded", function () {
+  var vistaActual = document.querySelector(".view-plantilla-de-centros-sanitarios.view-plantilla-centros-sanitarios-unica");
+
+  if (!vistaActual) {
+    return;
+  }
+
+  var selectElements = document.querySelectorAll(".simpler-select");
+  var botonConsulta = document.getElementById("edit-submit-plantilla-centros-sanitarios-unica");
+  var primerSelect = document.querySelector(".simpler-select");
+  var valorSeleccionado = primerSelect.getAttribute("data-parent-value");
+  var selectElement = document.querySelector(".simpler-select");
+  var optionAll = selectElement.querySelector('option[data-parent-value="All"]');
+
+  optionAll.disabled = true;
+
+  function verificarSeleccion() {
+    var primerFiltro = selectElements[0].value;
+    for (var i = 1; i < selectElements.length; i++) {
+      if (selectElements[i].value === "All" && primerFiltro !== "All") {
+        if (valorSeleccionado === "All") {
+          botonConsulta.disabled = true;
+          botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+        } else {
+          botonConsulta.disabled = false;
+          botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+        }
+        continue;
+      } else if (selectElements[i].value === "All") {
+        botonConsulta.disabled = true;
+        selectElements.removeChild(option);
+        botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+
+        if (valorSeleccionado === "All") {
+          botonConsulta.disabled = true;
+          botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+        } else {
+          botonConsulta.disabled = false;
+          botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+        }
+        return;
+      }
+    }
+
+    botonConsulta.disabled = false;
+    botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+  }
+
+  selectElements.forEach(function (selectElement) {
+    selectElement.addEventListener("change", verificarSeleccion);
+  });
+
+  botonConsulta.disabled = true;
+  botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+});
+// Fin arreglo Plantilla Media Centros Sanitarios
+
+// Eliminar UGS de los centros sanitarios
+function contienetexto(elemento, texto) { return elemento.textContent.indexOf(texto) !==-1; } 
+	var elementos = document.querySelectorAll('.center-extra_data__item');
+	elementos.forEach(function (elemento) { 
+	var span = elemento.querySelector('span.center-extra_data__text' );
+	 if (span && contienetexto(span,'Unidades gestión sanitaria')) { 
+	elemento.remove(); 
+	}
+}); 
+// Fin eliminar UGS de los centros sanitarios
+
+// Solucionar bug de menu hamburguesa naranja
+const navElement = document.getElementById('block-navegacionprincipal-2');
+function cambiarOlPorUl(elemento) {
+    if (!elemento || elemento.nodeType !== 1) {
+        console.warn('El elemento proporcionado no es válido.');
+        return;
+    }
+    const listasOrdenadas = elemento.querySelectorAll('ol.menu.sin-numeracion');
+    listasOrdenadas.forEach(listaOrdenada => {
+        const listaDesordenada = document.createElement('ul');
+        listaDesordenada.className = listaOrdenada.className;
+        while (listaOrdenada.firstChild) {
+            listaDesordenada.appendChild(listaOrdenada.firstChild);
+        }
+        listaOrdenada.parentNode.replaceChild(listaDesordenada, listaOrdenada);
+    });
+    elemento.querySelectorAll('li').forEach(li => {
+        cambiarOlPorUl(li);
+    });
+}
+// Fin solucionar bug de menu hamburguesa naranja
+
+// Llama a la función para cambiar las listas dentro del nav
+if (navElement) {
+    cambiarOlPorUl(navElement);
+} else {
+    console.warn('El elemento navElement no se encontró en el DOM.');
+}
+// Fin llama a la función para cambiar las listas dentro del nav
+
+// Eliminacion de subtipo para hospitales
+document.addEventListener("DOMContentLoaded", function() {
+    var paragraph = document.querySelector("p.center-label__title.center-label__title--secondary");
+    if (paragraph && paragraph.textContent.includes("Hospital")) {
+        var divToHide = document.querySelector("div.center-map__type_center");
+        if (divToHide) {
+            divToHide.style.display = "none";
+        }
+    }
+});
+//Fin eliminacion de subtipo para hospitales
+
+// Cambio de nombre en la tarjeta de donantes
+window.onload = function() {
+    if (document.body.classList.contains('sas-tarjeta-donantes-tarjeta-donantes')) {
+        document.querySelector('label[for="edit-name"]').textContent = 'Nombre y apellidos';
+    }
+};
+// Fin cambio de nombre en la tarjeta de donantes
+
+// Ocultar listas de espera de detalle de centros
+document.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('li.center-extra_data__item');
+    items.forEach(item => {
+        if (item.innerHTML.includes('Listas de espera')) {
+            item.remove();
+        }
+    });
+});
+// Fin ocultar listas de espera de detalle de centros
+
+// Plantilla centros. Deshabilitar botón si no se selecciona filtro
+document.addEventListener("DOMContentLoaded", function () {
+    const selectElement = document.getElementById("edit-tid--level-0");
+    const submitButton = document.querySelector("input[type='submit'][id='edit-submit-plantilla-centros-sanitarios-unica']");
+    function toggleButton() {
+        if (selectElement.value === "All") {
+            submitButton.disabled = true;
+            submitButton.classList.add("btn-plantilla-centros-dis");
+        } else {
+            submitButton.disabled = false;
+            submitButton.classList.remove("btn-plantilla-centros-dis");
+        }
+    }
+    toggleButton();
+    selectElement.addEventListener("change", toggleButton);
+});
+// Fin plantilla centros. Deshabilitar botón si no se selecciona filtro
+
+// Cambio de poster en videos 
+document.addEventListener('DOMContentLoaded', function () {
+  const videos = document.querySelectorAll('.playlist2-wrapper .videoarea');
+  videos.forEach(function (video) {
+    video.setAttribute('poster', '/servicioandaluzdesalud/sites/default/files/2020-03/poster_nuevo.png');
+  });
+});
+// Fin cambio de poster en videos 
+
+// Buzón en centro "Servicios centrales"
+document.addEventListener("DOMContentLoaded", function () {
+  const article = document.querySelector(
+    'article[about="/servicioandaluzdesalud/el-sas/servicios-y-centros/informacion-por-centros/25229"]'
+  );
+  if (article) {
+    const emailSpan = article.querySelector(
+      ".center-address__text.center-address__text--email"
+    );
+    if (emailSpan) {
+      emailSpan.innerHTML = `<a href="https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/contacto/sugerencias/registro" target="_blank" rel="noopener noreferrer">Buzón de contacto</a>`;
+    }
+  }
+});
+// Fin buzón en centro "Servicios centrales"
+
+
+// Cambiar icono de compartir en noticias
+jQuery(document).ready(function() {
+  jQuery('.block-compartir .comparte-url').css('background-image', 'url(/servicioandaluzdesalud/sites/default/files/social_icon/compartir.svg)');
+  jQuery('.block-compartir .comparte-twitter').css('background-image', 'url(/servicioandaluzdesalud/sites/default/files/social_icon/twittercompartir.svg)');
+  jQuery('.block-compartir .comparte-facebook').css('background-image', 'url(/servicioandaluzdesalud/sites/default/files/social_icon/facebookcompartir.svg)');
+});
+// Fin cambiar icono de compartir en noticias
+
+/* Comienzo comentados
+// Ocultar calendario 2026
+document.addEventListener("DOMContentLoaded", function() {
+  if (window.location.pathname.includes("/guia-laboral/calendario-laboral")) {
+    const contenedor = document.getElementById("otros_anios");
+    if (!contenedor) return;
+    const enlaces = contenedor.querySelectorAll("a.anio_cal");
+    if (enlaces.length === 0) return;
+    const ultimo = enlaces[enlaces.length - 1];
+    let nodoAnterior = ultimo.previousSibling;
+    if (nodoAnterior && nodoAnterior.nodeType === Node.TEXT_NODE) {
+      // Limpia el texto (elimina el guion y espacios)
+      nodoAnterior.textContent = nodoAnterior.textContent.replace(/-\s*$/, "");
+    }
+    ultimo.style.display = "none";
+  }
+});
+// Fin ocultar calendario 2026
+
+// Eliminar filas duplicadas ortoprotesica 
+jQuery(window).on("load", function () { if (jQuery("#views-exposed-form-prestacion-ortoprotesica-establecimientos-colaboradores-page-1").length> 0) {
+        function compare(ar1, ar2) {
+            ar1.sort();
+            ar2.sort();
+            if (ar1.length != ar2.length)
+                return false;
+            for (let i = 0; i < ar1.length; i++) { if (ar1[i] !=ar2[i]) return false; } return true; } for (let i=0; i
+				< jQuery("tr").length; i++) { var nonefil=[]; for (let z=0; z
+				< jQuery("tr")[i].getElementsByTagName("td").length; z++) { nonefil[z]=jQuery("tr" )[i].getElementsByTagName("td")[z].innerHTML; } for (let j=0; j
+				< jQuery("tr").length; j++) { var nsecfil=[]; for (let y=0; y
+				< jQuery("tr")[j].getElementsByTagName("td").length; y++) { nsecfil[y]=jQuery("tr" )[j].getElementsByTagName("td")[y].innerHTML; } if (i !=j) { if (compare(nonefil, nsecfil)) { jQuery("table")[0].deleteRow(i); } } } } 
+	} 
+}); 
+// Fin eliminar filas duplicadas ortoprotesica 
+
+// Corrección calendario laboral
+if(jQuery('.calendariolaboral').length){ jQuery('.ue-logo').appendTo('.block-views-blocklogo-encabezado-block-2'); jQuery('.logo-eatencion').appendTo('.block-views-blocklogo-encabezado-block-2'); jQuery('.eatencion-mobile').appendTo('.block-views-blocklogo-encabezado-block-2'); } 
+if(!jQuery(".calendariolaboral").length){ jQuery(".footer-wrapper-2").css("display","none" ); } 
+if (jQuery(".calendariolaboral").length && (jQuery("h1:first").html().indexOf('2024') !==-1)) { jQuery(".cols-0").after("<p>*Próximamente puede que se adopten acuerdos municipales que actualicen las fiestas locales.< p>"); } 
+// Fin corrección calendario laboral
+
+//Eliminar UGS de los centros sanitarios
+function contieneTexto(elemento, texto) { return elemento.textContent.indexOf(texto) !==-1; } 
+var elementos=document.querySelectorAll('.center-extra_data__item' ); 
+elementos.forEach(function (elemento) {
+	var span = elemento.querySelector('span.center-extra_data__text' ); 
+	if (span && contieneTexto(span,'Unidades gestión sanitaria' )) { elemento.remove(); }
+}); 
+//Fin eliminar UGS de los centros sanitarios
+
+//Mostrar fecha estadísticas
+if (window.location.href.includes("archivo-estadisticas")) {
+    var elemento = document.querySelector('.field--name-sas-xfecha-actualizacion-dt');
+	if (elemento) {
+        elemento.style.display = 'block';
+    }
+}
+//Fin mostrar fecha estadísticas
+
+// Comprobar y vaciar <caption> duplicados dentro de <div class=" view-grouping-content"> 
+const groupingContents=document.querySelectorAll('.view-grouping-content' ); 
+groupingContents.forEach(content=> {
+	const caption = content.querySelector('caption');
+	if (caption) {
+		const captionText = caption.innerText.trim();
+		if (seenTexts.has(captionText)) {
+			caption.innerText = ''; 
+		}
+	}
+});
+adjustColumnWidths();
+};
+const observer = new MutationObserver(callback);
+observer.observe(targetNode, config);
+callback();
+    }
+});
+// Fin omprobar y vaciar <caption> duplicados dentro de <div class=" view-grouping-content"> 
+
+Fin comentados */

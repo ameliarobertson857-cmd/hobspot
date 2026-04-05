@@ -1,0 +1,724 @@
+(function ($, Drupal, drupalSettings) {
+  Drupal.behaviors.mapasOpenlayer = {
+    attach: function (context, settings) {
+      if ($('.mapsas').length < 1) {
+        return;
+      }
+
+      function idGenerator() {
+        if (typeof window.gincremento == 'undefined') {
+          window.gincremento = 1;
+        } else {
+          window.gincremento = 1 * window.gincremento;
+        }
+        window.gincremento = window.gincremento + 1;
+        var S4 = function () {
+          return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        };
+        return ("G_" + window.gincremento + "_" + S4() + S4() + S4());
+      }
+
+      if (detect_old_IE(10)) {
+        //console.log("Navegador no compatible con librería de mapas.");
+        return;
+      }
+      var layers = {};
+      layers['default'] = [
+        new ol.layer.Tile({
+          title: 'Contexto',
+          source: new ol.source.TileWMS({
+            url: 'http://www.callejerodeandalucia.es/servicios/base/wms',
+            params: {
+              LAYERS: 'contexto_andalucia,batimetria',
+              VERSION: '1.1.1'
+            }
+          })
+        }) //Fondo. muestra comunidades / paises del entorno inmediato ; mar ;
+        , new ol.layer.Tile({
+          title: 'Base Cartografica',
+          opacity: 1,
+          source: new ol.source.TileWMS({
+            url: 'http://www.callejerodeandalucia.es/servicios/base/wms',
+            params: {
+              LAYERS: 'CDAU_base',
+              VERSION: '1.1.1'
+            }
+          })
+        }) //Mapa de fondo sin zoom, edificios con zoom*/
+        , new ol.layer.Tile({
+          title: 'Base Cartografica',
+          source: new ol.source.TileWMS({
+            url: 'http://www.callejerodeandalucia.es/servicios/base/wms',
+            params: {
+              LAYERS: 'CDAU_toponimia',
+              VERSION: '1.1.1'
+            }
+          })
+        }) //Toponimia*/
+        , new ol.layer.Tile({
+          title: 'Callejero',
+          source: new ol.source.TileWMS({
+            url: 'http://www.callejerodeandalucia.es/servicios/cdau/wms?Buffer=5',
+            params: {
+              LAYERS: 'CDAU_wms',
+              VERSION: '1.1.1'
+            }
+          })
+        }) // muestra trazado de calles y numeros de portales*/
+
+      ];
+
+      /*previo: reajusta para coordinacion de trasplantes fase dos*/
+        $(' .mapa-trasplantes-coordinacion  .item-list li:not(.procesado)').addClass('procesado').each(function(){
+          // console.log("PREPROCESA");
+          // console.log($(this));
+          $(this).find('[data-latlon]').each(function () {
+            // console.log("PREPROCESAitem");
+            var lista = $(this).parents('.procesado').find('var');
+            var lista =$("<li>" + $(lista).html() + "</li>");
+            // console.log(lista);
+            var titulo = $(this).text();
+            var id = $(this).attr('data-idcentro');
+            var latlon = $(this).attr("data-latlon");
+            if (latlon) {
+              // console.log("punto");
+              var autonomico = false;
+              var med = false;
+              var enf = false;
+              var sect = false;
+              var txt = $(lista).find('i').text();
+              if (txt.indexOf('Auton') > 0) {
+                 autonomico = true;
+              }
+              if (txt.indexOf('hospitalario') > 0) {
+                 med = true;
+              }
+              if (txt.indexOf('nfermer') > 0) {
+                 enf = true;
+              }
+              if (txt.indexOf('ectorial') > 0) {
+                 sect = true;
+              }
+
+              var html;
+
+              var tooltiptxt = '<strong>' +
+                titulo +
+                '</strong><span class="tooltip"><span class="titulo-tooltip" >' +
+                 titulo +
+  									'</span ><div class="item-list"><ul id=' +
+                         id + '></ul></div></span>';
+              var incluido = false;
+              if (autonomico){
+               html = $('<span data-latlon="' +
+                        latlon +
+                        '" data-tooltip=".tooltip" data-id=' +
+                        id +
+                        '>' +
+                        tooltiptxt +
+                        '</span>');
+               $(html).attr("data-marker", 18);
+               $(lista).attr("data-layer", "aut");
+               incluido = true;
+             } else {
+                 html = $('<span></span>');
+             }
+                 //Iconillos adicionales
+             if (med) {
+                $(html).append('<span data-marker="9"  ' +
+                      (incluido ? 'style="display:none;speak:none;"' : '') +
+                      ' data-tooltip=".tooltip" data-latlon="' +
+                      latlon +
+                      '" data-id=' +
+                      id +
+                       '>' +
+                      tooltiptxt +
+                     '</span>');
+                     $(lista).attr("data-layer","med");
+                 incluido = true;
+              }
+             if (enf) {
+                $(html).append('<span data-marker="10" ' +
+                  (incluido ? 'style="display:none;speak:none;"' : '') +
+                   ' data-tooltip=".tooltip" data-latlon="' +
+                   latlon +
+                  '"  data-id=' +
+                    id +
+                     '>' +
+                   tooltiptxt +
+                   '</span>');
+               $(lista).attr("data-layer", "enf");
+                 incluido = true;
+              }
+              if (sect) {
+                 $(html).append('<span data-marker="8" ' +
+                 (incluido ? 'style="display:none;speak:none;"' : '') +
+                 ' data-tooltip=".tooltip" data-latlon="' +
+                 latlon +
+                   ' data-id=' +
+                   id +
+                   '>' +
+                 tooltiptxt +
+                 '</span>');
+                $(lista).attr("data-layer", "sect");
+                 incluido = true;
+               }
+              // console.log($('[data-id=' + id + ']').lenght);
+              // console.log('longi');
+              $(html).addClass('field-content');
+              if ($('span [data-id="' + id + '"]').length){
+                //  console.log('se salta');
+               }else{
+                  // console.log('se suma');
+                  // console.log($(html).length);
+                 $('div.view-content>div.item-list').append(html);
+               }
+
+               if($(lista).length){
+                 $('[id=' + id + ']').append(lista);
+               }
+
+                        } else {
+             //$(this).parent().parent().remove();
+              //  console.log("sinpunto");
+            }
+          });
+          // $(this).remove();
+        });
+        $('.mapa-trasplantes-coordinacion  var').remove();
+        $('.mapa-trasplantes-coordinacion  .item-list>ol>li:not(.final)').remove();
+        // $('div.view-content>div.item-list').append('<ol></ol>');
+        $('.mapa-trasplantes-coordinacion  .item-list > span:not(.procesado)').addClass('procesado').each(function () {
+          console.log("procesado");
+          html = $('<div></div>');
+          $(html).addClass('views-field');
+          $(html).addClass('views-field-title');
+          $(html).html($(this));
+
+          html2 = $('<div></div>');
+          $(html2).addClass('views-field');
+          $(html2).addClass('views-field-sascentro-idcentro');
+          // console.log($(this).children('span').attr('data-id'));
+          html3 = $('<div class="field-content"></div>');
+          $(html3).html($(this).children('span').attr('data-id'));
+          $(html2).html($(html3));
+          // console.log($(html2).html());
+          html4 = $('<li class="final procesado"></li>');
+          $(html4).append($(html));
+          $(html4).append($(html2));
+          // // // $(html2).appendTo($(html4));
+          // // // console.log($(html4));
+          $('div.item-list > ol').append($(html4));
+          // // // $(html4).appendTo('div.item-list > ol');
+          console.log("fin procesado");
+         });
+      $('.mapa-trasplantes-coordinacion .view-content').hide();
+
+      /*contruir mapas*/
+      console.log($('.mapsas').length);
+      if (!$('body').hasClass('jsmapacentros') && $('.mapsas').length > 0) {
+        $('body').addClass("jsmapacentros");
+        buildsasmaps();
+        $('div.controles .control').click(function () {
+          $(this).toggleClass("activo")
+        });
+      }
+
+      function buildsasmaps() {
+
+        if (detect_old_IE(10)) { //IE < 10
+          return;
+        }
+
+        $('.mapsas').each(function () {
+          if (!this.id) {
+            this.id = idGenerator();
+          }
+          var opcionbase = {
+            sprite: '/servicioandaluzdesalud/themes/sas2018/img/spritemap2.png',
+            latlon: null,
+            center: null,
+            info: null,
+            url: null,
+            minZoom: 6,
+            maxZoom: 23,
+            zoom: null,
+            width: null,
+            height: null,
+            marker: 1,
+            markerpositioning: "bottom-center",
+            layers: "default",
+            modo: null,
+            screenx: 1,
+            icobox: 64,
+            icosize: 36,
+            tooltip: null,
+            layermenu: false
+          }
+          var opciones = [];
+          opciones['id'] = this.id;
+          var div = $(this);
+          var listaopciones = ["sprite", "latlon", "center", "minZoom", "maxZoom", "zoom", "width", "height", "info", "url", "marker", "layers", 'screenx', 'icosize', 'icobox', 'markerpositioning', 'tooltip', "layermenu"];
+          for (var i = 0; i < listaopciones.length; i++) {
+            if (typeof (div.attr("data-" + listaopciones[i])) !== 'undefined') {
+              //console.log("encontrado "+listaopciones[i]);
+              opciones[listaopciones[i]] = div.attr("data-" + listaopciones[i]);
+            } else {
+              opciones[listaopciones[i]] = opcionbase[listaopciones[i]];
+            }
+          }
+          if (null == opciones.info && null == opciones.url && null == opciones.center && null == opciones.latlon) {
+            console.log("No data, no map.");
+            return;
+          }
+          //multipunto o monopunto
+          if (null == opciones.info && null == opciones.url) {
+            //Monopunto. Punto latlon y centro, si falta alguno toma el valor del otro.
+            //Zoom se pone forzado
+            null == opciones.zoom ? opciones.zoom = 18 : opciones.zoom = 1 * opciones.zoom;
+            if (null == opciones.center && null != opciones.latlon) {
+              opciones.center = opciones.latlon;
+            } else if (null == opciones.latlon && null != opciones.center) {
+              opciones.latlon = opciones.center;
+            }
+            opciones.modo = "punto";
+          } else { //multipunto
+            opciones.modo = "multipunto";
+          }
+          console.log(opciones);
+          buildiconos(opciones, this);
+        });
+
+
+      }
+
+      function lonlat_from_str_latlon(str) {
+        //if(!str)return [0,0];
+        var geo = str.split(',');
+        return [1 * geo[1], 1 * geo[0]];
+      }
+
+      function buildmarker(opciones, pos, icoidx) {}
+
+      function buildiconos(opciones, mapsas) {
+        //console.log(opciones);
+        //console.log(navigator.userAgent);
+        var urltokens = opciones.sprite.split('?');
+        urltokens = urltokens[0].split('.');
+        if (urltokens.pop() == 'svg') {
+          console.log("version svg");
+          $.get(opciones.sprite, function (bytes) {
+            var svgd = $(bytes).find('svg').first();
+            var w = svgd.attr("width");
+            var h = svgd.attr("height");
+            var c = $('<canvas width="' + w * opciones.screenx + '" height="' + h * opciones.screenx + '"></canvas>');
+            var canvas = c.get()[0];
+            var ctx = canvas.getContext("2d");
+            var img = $('<img src="' + opciones.sprite + '" style="display:none;">');
+            img.get()[0].onload = function () {
+              var icondataurl;
+              try {
+                ctx.drawImage(img.get()[0], 0, 0, w * opciones.screenx, h * opciones.screenx);
+                icondataurl = canvas.toDataURL("image/png");
+              } catch (e) {
+                console.log(e)
+                icondataurl = opciones.sprite;
+                opciones.screenx = 1;
+              };
+              //Control ieEdge
+
+              //$('.mapsas').each(function(){
+              //Construir array de iconos y aÃ±adirlo a opciones
+              opciones.iconos = iconcollection(icondataurl, w * opciones.screenx, h * opciones.screenx, opciones.screenx, opciones.icobox, opciones.icosize, opciones.marker);
+              opciones.puntos = new Array();
+              if (opciones.modo == 'punto') {
+                var tooltip = false;
+                if (opciones.tooltip && $(mapsas).find(opciones.tooltip).length > 0) {
+                  tooltip = $(mapsas).find(opciones.tooltip).first().html();
+                }
+                opciones.puntos.push({
+                  capa: "centros",
+                  pos: (lonlat_from_str_latlon(opciones.latlon)),
+                  ico: 0,
+                  tooltip: tooltip
+                }); //0 es el marcador por defecto
+                opciones.center = (lonlat_from_str_latlon(opciones.center));
+                //AÃ±adimos el punto y a render
+                rendermap(opciones, mapsas);
+                //});
+              } else {
+
+                if (opciones.center) {
+                  opciones.center = (lonlat_from_str_latlon(opciones.center));
+                }
+                //Construir array de iconos y aÃ±adirlo a opciones
+                opciones.iconos = iconcollection(icondataurl, w * opciones.screenx, h * opciones.screenx, opciones.screenx, opciones.icobox, opciones.icosize, opciones.marker);
+                //Cargar lista de puntos
+                //De html:
+                if (opciones.info) {
+                  var listaitems = $(opciones.info);
+                  //console.log(listaitems);
+                  if (listaitems.length > 0) {
+                    for (var i = 0; i < listaitems.length; i++) {
+                      var item = $(listaitems[i]);
+
+                      if ($(item).attr("data-latlon")) {
+                        //opciones.puntos.push({capa:"centros", pos: (lonlat_from_str_latlon(opciones.latlon)) , ico: 0});//0 es el marcador por defecto
+                        var capa = ($(item).attr("data-layer")) ? $(item).attr("data-layer") : "centros";
+                        var pos = lonlat_from_str_latlon($(item).attr("data-latlon"));
+                        var ico = ($(item).attr("data-marker")) ? $(item).attr("data-marker") * 1 : 0;
+                        var tooltip = ($(item).attr("data-tooltip")) ? $(item).attr("data-tooltip") : false;
+                        if (tooltip != false) {
+                          tooltip = $(item).find(tooltip).first().html();
+                        } else if (tooltip == false && opciones.tooltip && $(mapsas).find(opciones.tooltip).length > 0) {
+                          tooltip = $(mapsas).find(opciones.tooltip).first().html();
+                        }
+                        opciones.puntos.push({
+                          capa: capa,
+                          pos: pos,
+                          ico: ico,
+                          tooltip: tooltip
+                        });
+                      }
+                    }
+                  }
+                }
+                //De fichero o mixta
+                //Continua carga y al callback llama buildmap
+                if (opciones.url) {
+                  //Cargar puntos de url
+                  $.get(opciones.url, function (data) {
+                    //console.log("cargada");
+                    if (typeof data != "object") {
+                      data = JSON.parse(data);
+                    }
+                    //pos
+                    //layer
+                    //marker
+                    for (var i = 0; i < data.length; i++) {
+                      var p = data[i];
+                      var capa = (p.layer) ? p.layer : "centros";
+                      var pos = p.pos;
+                      var ico = p.marker ? p.marker * 1 : 0;
+                      opciones.puntos.push({
+                        capa: capa,
+                        pos: pos,
+                        ico: ico
+                      });
+                    }
+                    rendermap(opciones, mapsas);
+                  });
+                } else {
+                  rendermap(opciones, mapsas);
+                }
+              }
+            };
+          });
+        } else {
+          console.log("version PNG");
+          $.get(opciones.sprite, function (bytes) {
+            var img = $('<img src="' + opciones.sprite + '" style="display:block;opacity:0;">');
+            $('body').append(img);
+            img.get()[0].onload = function () {
+              var w = img.get()[0].width;
+              var h = img.get()[0].height;
+              img.remove();
+              opciones.iconos = iconcollection(opciones.sprite, w * opciones.screenx, h * opciones.screenx, opciones.screenx, opciones.icobox, opciones.icosize, opciones.marker);
+              opciones.puntos = new Array();
+              if (opciones.modo == 'punto') {
+                var tooltip = false;
+                if (opciones.tooltip && $(mapsas).find(opciones.tooltip).length > 0) {
+                  tooltip = $(mapsas).find(opciones.tooltip).first().html();
+                }
+                opciones.puntos.push({
+                  capa: "centros",
+                  pos: (lonlat_from_str_latlon(opciones.latlon)),
+                  ico: 0,
+                  tooltip: tooltip
+                }); //0 es el marcador por defecto
+                opciones.center = (lonlat_from_str_latlon(opciones.center));
+                //AÃ±adimos el punto y a render
+                rendermap(opciones, mapsas);
+                //});
+              } else {
+                //console.log(opciones.sprite,w*opciones.screenx,h*opciones.screenx,opciones.screenx,opciones.icobox,opciones.icosize,opciones.marker);
+
+                if (opciones.center) {
+                  opciones.center = (lonlat_from_str_latlon(opciones.center));
+                }
+                //Construir array de iconos y aÃ±adirlo a opciones
+                opciones.iconos = iconcollection(opciones.sprite, w * opciones.screenx, h * opciones.screenx, opciones.screenx, opciones.icobox, opciones.icosize, opciones.marker);
+
+                //console.log(opciones.sprite,w*opciones.screenx,h*opciones.screenx,opciones.screenx,opciones.icobox,opciones.icosize,opciones.marker);
+                //Cargar lista de puntos
+                //De html:
+                if (opciones.info) {
+                  var listaitems = $(opciones.info);
+                  //console.log(listaitems);
+                  if (listaitems.length > 0) {
+                    for (var i = 0; i < listaitems.length; i++) {
+                      var item = $(listaitems[i]);
+
+                      if ($(item).attr("data-latlon")) {
+                        //opciones.puntos.push({capa:"centros", pos: (lonlat_from_str_latlon(opciones.latlon)) , ico: 0});//0 es el marcador por defecto
+                        var capa = ($(item).attr("data-layer")) ? $(item).attr("data-layer") : "centros";
+                        var pos = lonlat_from_str_latlon($(item).attr("data-latlon"));
+                        var ico = ($(item).attr("data-marker")) ? $(item).attr("data-marker") * 1 : 0;
+                        var tooltip = ($(item).attr("data-tooltip")) ? $(item).attr("data-tooltip") : false;
+                        if (tooltip != false) {
+                          tooltip = $(item).find(tooltip).first().html();
+                        } else if (tooltip == false && opciones.tooltip && $(mapsas).find(opciones.tooltip).length > 0) {
+                          tooltip = $(mapsas).find(opciones.tooltip).first().html();
+                        }
+                        //console.log(tooltip);
+                        opciones.puntos.push({
+                          capa: capa,
+                          pos: pos,
+                          ico: ico,
+                          tooltip: tooltip
+                        });
+                      }
+                    }
+                  }
+                }
+
+                //De fichero o mixta
+                //Continua carga y al callback llama buildmap
+                if (opciones.url) {
+                  //Cargar puntos de url
+                  $.get(opciones.url, function (data) {
+                    //console.log("cargada");
+                    if (typeof data != "object") {
+                      data = JSON.parse(data);
+                    }
+                    //pos
+                    //layer
+                    //marker
+                    for (var i = 0; i < data.length; i++) {
+                      var p = data[i];
+                      var capa = (p.layer) ? p.layer : "centros";
+                      var pos = p.pos;
+                      var ico = p.marker ? p.marker * 1 : 0;
+                      opciones.puntos.push({
+                        capa: capa,
+                        pos: pos,
+                        ico: ico
+                      });
+                    }
+                    rendermap(opciones, mapsas);
+                  });
+                } else {
+                  rendermap(opciones, mapsas);
+                }
+              }
+            };
+          });
+        }
+      }
+
+      function iconcollection(icondataurl, w, h, scale, icobox, icosize, defecto) {
+        //Coordenadas de un icono:
+        var i = 0;
+        var iconos = new Array();
+        iconos[0] = null;
+        for (var y = 0; y < h; y = y + icobox * scale) {
+          for (var x = 0; x < w; x = x + icobox * scale) {
+            iconos.push(new ol.style.Icon({
+              offset: [x, y],
+              opacity: 1,
+              rotateWithView: false,
+              rotation: 0.0,
+              scale: 1 / scale,
+              size: [icosize * scale, icosize * scale],
+              crossOrigin: 'anonymous',
+              src: icondataurl
+            }));
+          }
+        }
+        iconos[0] = iconos[defecto];
+        return iconos;
+      }
+
+      function rendermap(opciones) {
+        console.log("rendermap")
+        console.log(opciones.puntos)
+        var viewdata = {};
+        viewdata.zoom = opciones.zoom ? opciones.zoom : 18;
+        viewdata.minZoom = opciones.minZoom ? opciones.minZoom : 7;
+        viewdata.maxZoom = opciones.maxZoom ? opciones.maxZoom : 23;
+        opciones.center ? viewdata.center = ol.proj.fromLonLat(opciones.center) : false;
+        var view = new ol.View(viewdata);
+        var jqcontainer = $('<div class="mapsas-popup"></div>'); //document.getElementById('popup');
+        var jqcontent = $('<div class="mapsas-popup-content"></div>'); //document.getElementById('popup-content');
+        var jqcloser = $('<a href="#" class="mapsas-popup-closer"></a>'); //document.getElementById('popup-closer');
+        jqcontainer.append(jqcloser);
+        jqcontainer.append(jqcontent);
+        $('body').append(jqcontainer);
+        var container = jqcontainer.get()[0];
+        var content = jqcontent.get()[0];
+        var closer = jqcloser.get()[0];
+        var overlay = new ol.Overlay({
+          element: container,
+          autoPan: true,
+          autoPanAnimation: {
+            duration: 250
+          }
+        });
+        var mapdata = {
+          target: opciones.id,
+          layers: layers[opciones.layers],
+          overlays: [overlay],
+          view: view
+
+        };
+        var ie = detectIE();
+        if (ie === false || ie > 11) {
+          mapdata.controls = ol.control.defaults().extend([
+            new ol.control.FullScreen()
+          ])
+        }
+
+
+        var map = new ol.Map(mapdata);
+        //recorrer el listado de puntos,
+
+        var tooltipinfo = [];
+        var marcadores = {};
+        for (var i = 0; i < opciones.puntos.length; i++) {
+          if (!marcadores[opciones.puntos[i].capa]) {
+            marcadores[opciones.puntos[i].capa] = [];
+          }
+          var id = idGenerator();
+          var marker = new ol.Feature({
+            geometry: new ol.geom.Point(
+              ol.proj.fromLonLat(opciones.puntos[i].pos)
+            ),
+            id: id
+          });
+          marker.setStyle(new ol.style.Style({
+            image: opciones.iconos[opciones.puntos[i].ico],
+            positioning: opciones.markerpositioning
+          }));
+          marcadores[opciones.puntos[i].capa].push(
+            marker
+          );
+          if (opciones.puntos[i].tooltip) {
+            //append tooltip
+            tooltipinfo[id] = opciones.puntos[i].tooltip;
+          }
+
+        }
+        var extension = ol.extent.createEmpty();
+        for (var p in marcadores) {
+          var vectorSource = new ol.source.Vector({
+            features: marcadores[p]
+          });
+          var markerVectorLayer = new ol.layer.Vector({
+            source: vectorSource,
+            title: p
+          });
+          markerVectorLayer.setVisible(true); //TODO configurable por capa
+          //console.log(p);
+          map.addLayer(markerVectorLayer);
+          var layerext = vectorSource.getExtent();
+          ol.extent.extend(extension, layerext);
+        }
+        if (opciones.modo != 'punto') {
+          map.getView().fit(extension);
+        }
+
+        if (opciones.layermenu != false) {
+          $(opciones.layermenu).click(function () {
+            var idlayer = $(this).attr("data-layer-toggle");
+            map.getLayers().forEach(function (layer, i) {
+              if ((layer['values_']['title']) == idlayer) {
+                layer.setVisible(!layer.getVisible());
+                //map.render();
+                //console.log(layer);
+              }
+            });
+          });
+        }
+
+        //AÃ±adir clicks
+        closer.onclick = function () {
+          overlay.setPosition(undefined);
+          closer.blur();
+          return false;
+        };
+        map.on('singleclick', function (evt) {
+          var coordinate = evt.coordinate;
+          var hay = false;
+          var str = "";
+          var listastr = [];
+          map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            if (feature.values_.id && tooltipinfo[feature.values_.id]) {
+              //console.log(feature);
+              //str+=tooltipinfo[feature.values_.id];
+              var s = tooltipinfo[feature.values_.id];
+              if (listastr.indexOf(s) == -1) {
+                listastr.push(s);
+              }
+              hay = true;
+            }
+          });
+
+          if (hay) {
+            str = listastr.join('');
+            content.innerHTML = str;
+            overlay.setPosition(coordinate);
+          } else {
+            overlay.setPosition(undefined);
+          }
+        });
+
+      }
+
+      function detect_old_IE(min) {
+        var v = detectIE();
+        if (v === false || v >= min) {
+          return false; //No IE, o >= a la minima
+        }
+        return true; //Menor que la minima requerida
+      }
+
+      function detectIE() {
+        var ua = window.navigator.userAgent;
+        // IE 10
+        // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+        // IE 11
+        // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+        // Edge 12 (Spartan)
+        // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+        // Edge 13
+        //ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+        var msie = ua.indexOf('MSIE ');
+        if (msie > 0) {
+          //return true;
+          // IE 10 or older => return version number
+          return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+        }
+        var trident = ua.indexOf('Trident/');
+        if (trident > 0) {
+          // IE 11 => return version number
+          var rv = ua.indexOf('rv:');
+          return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+        }
+
+        var edge = ua.indexOf('Edge/');
+        if (edge > 0) {
+          // Edge (IE 12+) => return version number
+          return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+        }
+        // other browser
+        return false;
+      }
+
+
+
+
+
+    }
+  }
+
+})(jQuery, Drupal, drupalSettings);

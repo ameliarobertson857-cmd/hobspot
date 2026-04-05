@@ -1,0 +1,2481 @@
+(function ($, Drupal, drupalSettings) {
+
+  'use strict';
+
+  /*Drupal.behaviors.mybehavior = {
+    attach: function (context, settings) {
+      console.log(drupalSettings.fluffiness.cuddlySlider.foo);
+    }
+  };*/
+  Drupal.behaviors.varias = {
+    attach: function (context, settings) {
+
+      // escondo toda la pagina hasta que no este completamente cargada
+      // para evitar de ver superfish y los banner blinkear
+      $(window).on("load", function () {
+        $('body').addClass('carga-completa');
+        $('.carousel-hp').show(); // busca .carousel-hp en _banner-carousel.scss
+        $('.block-superfish ul.sf-menu li.menuparent ul').show(); // busca .block-superfish ul.sf-menu li.menuparent ul en _primary-menu.scss
+        $('.float-dx').show(); // busca .float-dx en _page.scss
+        // solo para cartera servicios at. primaria, es el unico apartado que tenga col. izquierda
+        var pagTitle = $('.layout-sidebar-first h1.page-title span').html();
+        $('.layout-sidebar-first h1.page-title').text(pagTitle);
+
+        //Ocultar buscar en noticias si no se ha escrito nada en cuadro de búsquedas
+        var pathsearch = window.location.pathname;
+        function getAbsolutePath() {
+          var loc = window.location;
+          var pathName = loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1);
+          return loc.href.substring(0, loc.href.length - ((loc.pathname + loc.search + loc.hash).length - pathName.length));
+        }
+
+        //ocultar ordenar por fecha actualizacion si no hay contenido
+        if ($("input#edit-keys-sel--2").val()) {
+          if ($("input#edit-keys-sel--2").val().length != 0) {
+            $(".search-api-sorts li").show();
+          }
+        }
+
+        //mover buscadores especificos a sidebar-right
+        //PROBAR A METER STRONG EN LI
+        if ($("#list-busc").length == 0) {
+          if ($("#block-visibilidaddefacetasenbuscador--2").length != 0) {
+            $("#block-visibilidaddefacetasenbuscador--2").append("<ul id='list-busc'></ul>");
+          }
+          if ($("#block-visibilidaddefacetasenbuscador").length != 0) {
+            $("#block-visibilidaddefacetasenbuscador").append("<ul id='list-busc'></ul>");
+          }
+
+          //$("#block-visibilidaddefacetasenbuscador--2").append("<ul id='list-busc'></ul>");
+        }
+        if ($(".facets-widget-checkbox li strong").last().text() === " +") {
+          $(".facets-widget-checkbox li strong").last().hide();
+        }
+
+
+        //Se elimina del desplegable los option de buscador avanzado
+        let optionsfacet = document.querySelectorAll('.facets-widget-dropdown > select > option');
+        optionsfacet.forEach(function once(option) {
+          if (option.outerHTML.indexOf("/buscador?keys_sel") == -1 && option.outerHTML.indexOf("Todo") == -1) {
+            option.remove();
+          }
+        });
+        //aquí termina la eliminación de options de buscador avanzado
+
+        let elements = document.querySelectorAll('.facets-widget-dropdown > ul > li > strong');
+        // let urlb = window.location.hostname+"/";
+        // let protocol = window.location.protocol+"//";
+
+        // if($("#busc-notic").length == 0 && $("#edit-keys-sel--2").val().length != 0) {
+        //     $("#list-busc").append("<li id='busc-notic' class='li-busc-esp'>"+"<strong><a href='" + protocol +urlb + "todas-noticia?combine=" + $("#edit-keys-sel--2").val() + "'>Noticias</a></strong>"+"</li>");
+        //   }
+        //console.log(elements);
+        elements.forEach(function once(busc) {
+          //console.log(busc.outerHTML);
+          // let urlb = window.location.hostname+"/";
+          // let protocol = window.location.protocol+"//";
+
+          // if($("#busc-notic").length == 0) {
+          //   $("#list-busc").append("<li id='busc-notic' class='li-busc-esp'>"+"<strong><a href='" + protocol +urlb + "todas-noticia?combine=" + $("#edit-keys-sel--2").val() + "'>Noticias</a></strong>"+"</li>");
+          // }
+
+          if (busc.outerHTML.indexOf("Centros") != -1 && $("#busc-centros").length == 0) {
+            $("#list-busc").append("<li id='busc-centros' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+          if (busc.outerHTML.indexOf("Normativas") != -1 && $("#busc-norm").length == 0) {
+            $("#list-busc").append("<li id='busc-norm' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+          if (busc.outerHTML.indexOf("Publicaciones") != -1 && $("#busc-public").length == 0) {
+            $("#list-busc").append("<li id='busc-public' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+          if (busc.outerHTML.indexOf("Estadísticas") != -1 && $("#busc-statistics").length == 0) {
+            $("#list-busc").append("<li id='busc-statistics' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+          if (busc.outerHTML.indexOf("Noticias") != -1 && $("#busc-notic").length == 0) {
+            $("#list-busc").append("<li id='busc-notic' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+          if (busc.outerHTML.indexOf("Novedades") != -1 && $("#busc-noved").length == 0) {
+            $("#list-busc").append("<li id='busc-noved' class='li-busc-esp'>" + busc.outerHTML + "</li>");
+          }
+        });
+
+        //AQUÍ TERMINA METER STRONG EN LI
+
+        //comprobar si hay barra de scroll en facetas de buscador
+        if ($("#block-tipodecontenidoba").length) {
+          if ($("#block-tipodecontenidoba").prop('scrollWidth') < ($("#block-tipodecontenidoba").width())) {
+          }
+          else if ($("#block-tipodecontenidoba").prop('scrollWidth') == ($("#block-tipodecontenidoba").width())) {
+            //al entrar aquí sin montar el mas solucionamos el error de que aparezca vacio
+          }
+          else {
+            //mostrar solo 4 primeros li
+            $(".facets-widget-checkbox li").hide();
+            $(".facets-widget-checkbox li:nth-child(1)").show();
+            $(".facets-widget-checkbox li:nth-child(2)").show();
+            $(".facets-widget-checkbox li:nth-child(3)").show();
+            //$(".facets-widget-checkbox li:nth-child(4)").show();
+            if ($("#mas-tipos-cont").length == 0) {
+              $(".facets-widget-checkbox li:nth-child(3)").after("<li><nav id='mas-tipos-cont'>Más<strong> +</strong></nav></li>");
+              var restantes = [];
+              for (var i = 4; i < $(".facets-widget-checkbox li").length; i++) {
+                restantes[i] = $(".facets-widget-checkbox li")[i];
+              }
+              if ($("#rest-types").length == 0) {
+                $("#mas-tipos-cont").append("<ul id='rest-types'></ul>");
+                restantes.forEach(function (elemento) {
+                  elemento.className += " element-rest";
+                  $("#rest-types").append(elemento);
+                });
+              }
+              $("#block-tipodecontenidoba").css("overflow", "visible");
+            }
+            //aquí termina prueba mostrar solo 4 primeros li
+          }
+
+        }
+
+        //obtener posicion x y de mas
+        // if($("#mas-tipos-cont").length != 0){
+        //   var posmas = $("#mas-tipos-cont").position();
+        //   $("#rest-types").css("top",(posmas.top+32));
+        //   $("#rest-types").css("left",(posmas.left-3));
+        //   $("#mas-tipos-cont").css("height","30px");
+
+        //   if($("#toolbar-administration").length == 0) {
+        //      $("#rest-types").css("top",(posmas.top+119));
+        //      $("#rest-types").css("left",(posmas.left+110));
+        //      $("#rest-types").css("width","32%");
+        //      $("#mas-tipos-cont").css("height","30px");
+        //   }
+        // }
+
+        if ($('.view-buscador-avanzado.view-display-id-page_1').length) {
+          if (location.search && $(".view-empty") && location.search != "?keys_sel=") {
+            $(".view-empty").html("0 resultados encontrados");
+          }
+
+          // prueba mover buscadores especificos para responsive
+
+          if ($(window).width() < 821) {
+            $("#block-sas2018-content").append($("#block-visibilidaddefacetasenbuscador--2"));
+            $("#block-sas2018-content").append($("#block-visibilidaddefacetasenbuscador"));
+            $("#block-tipodecontenidoba").css('display', 'flex');
+          }
+
+          //mover faceta tipo contenido a la derecha de Todo
+          $("#rendered_item").before($("#block-tipodecontenidoba").show());
+
+          //mostrar filtro de fechas sin resultados de búsqueda
+          $("#edit-sas-xfecha-actualizacion-dt--2").datepicker({ dateFormat: 'dd-mm-yy' });
+          $("#edit-sas-xfecha-actualizacion-dt-1--2").datepicker({ dateFormat: 'dd-mm-yy' });
+
+          //change select to checkbox
+          if ($("#edit-search-api-fulltext-searched-fields--2").length) {
+            $("input[id='rendered_item']").attr('checked', true);
+            $("#edit-search-api-fulltext-searched-fields--2 option[value='" + "rendered_item" + "']").attr("selected", true);
+            // if(location.search.indexOf("rendered_item")!= -1 || (location.search.indexOf("?keys_sel")!= -1 && location.search.indexOf("&") == -1)){
+            //   $("input[id='rendered_item']").attr('checked', true);
+            // }
+            // else{
+            //   $("input[id='rendered_item']").attr('checked', false);
+            // }
+            // if($("input[id='rendered_item']").is(':checked')){
+            //   $("#edit-search-api-fulltext-searched-fields--2 option[value='"+ "rendered_item" +"']").attr("selected",true);
+            // }
+            // else{
+            //   $("#edit-search-api-fulltext-searched-fields--2 option[value='"+ "rendered_item" +"']").attr("selected",false);
+            // }
+            if ($("#rendered_item").length < 1) {
+              $("label[for='edit-search-api-fulltext-searched-fields--2']").remove();
+              $("#edit-search-api-fulltext-searched-fields--2 option").each(function () {
+                $("#edit-search-api-fulltext-searched-fields--2 option[value='" + "title" + "']").attr("selected", true);
+                var val = $(this).val();
+                if (val == 'rendered_item') {
+                  $(".form--inline").after('<div class="check-full-content"><input type="checkbox"  name="' + $(this).val() + '" id="' + $(this).val() + '" value="' + $(this).val() + '"><label for="rendered_item">' + "Todo" + '</label></div>');
+                  //$(".form-item-search-api-fulltext-searched-fields").append('<input type="checkbox"  name="'+$(this).val()+'" id="'+$(this).val()+'" value="'+$(this).val()+'"><label for="rendered_item">'+"Buscar el texto en el contenido completo"+'</label>');
+                }
+              })
+
+              $('input').on('change', function () {
+                if (this.checked) {
+                  $("#edit-search-api-fulltext-searched-fields--2 option[value='" + this.value + "']").attr("selected", true);
+                } else {
+                  $("#edit-search-api-fulltext-searched-fields--2 option[value='" + this.value + "']").attr("selected", false);
+                }
+
+              })
+            }
+          }
+          if ($("input#edit-keys-sel--2").val().length == 0) {
+            $("#block-tipodecontenidoba").hide();
+          }
+          else {
+            $("#block-tipodecontenidoba").show();
+          }
+
+          //move filter date in view
+          if ($("#filter-dates-view").length == 0) {
+            $("#block-tipodecontenidoba").after("<div id='filter-dates-view'></div>");
+            //$(".check-full-content label").after("<div id='filter-dates-view'></div>");
+            $("#filter-dates-view").append($("#edit-sas-xfecha-actualizacion-dt--2"));
+            $("#filter-dates-view").append($("#edit-sas-xfecha-actualizacion-dt-1--2"));
+          }
+          $(".check-full-content").append($("#filter-dates-view"));
+
+
+          if (location.search && $('#btn-clear-search').length == 0) {
+            let newButton = document.createElement('button');
+            newButton.type = 'button';
+            newButton.innerHTML = 'Limpiar búsqueda';
+            newButton.setAttribute('id', 'btn-clear-search');
+            newButton.onclick = redirectClear;
+            // document.getElementById('views-exposed-form-buscador-avanzado-page-1').appendChild(newButton);
+            $('#views-exposed-form-buscador-avanzado-page-1 .form-actions').append(newButton);
+          }
+
+          document.getElementById("views-exposed-form-buscador-avanzado-page-1").addEventListener('submit', validarFormulario);
+          function validarFormulario(evento) {
+            var textSearch = document.getElementById("edit-keys-sel--2").value ? document.getElementById("edit-keys-sel--2").value : document.getElementById("edit-keys-sel").value;
+            evento.preventDefault();
+
+            if (textSearch.length == 0 || textSearch == " ") {
+              location.search = "";
+              $(location).search({ 'parameter': null });
+            }
+            if (textSearch.length != 0 && location.search.indexOf("&") != -1 && location.search && textSearch != oldsearch) {
+              // if($("input[id='rendered_item']").is(':checked')){
+              //   textSearch = textSearch+"&search_api_fulltext_searched_fields%5B%5D=rendered_item&search_api_fulltext_searched_fields%5B%5D=title";
+              //   location.search = "?keys_sel="+textSearch;
+              // }else {
+              //   textSearch = textSearch+"&search_api_fulltext_searched_fields%5B%5D=title";
+              //   location.search = "?keys_sel="+textSearch;
+              // }
+              textSearch = textSearch + "&search_api_fulltext_searched_fields%5B%5D=rendered_item&search_api_fulltext_searched_fields%5B%5D=title";
+              location.search = "?keys_sel=" + textSearch;
+              $(location).search({ 'keys_sel': textSearch });
+            }
+            this.submit();
+          }
+        }
+
+        function redirectClear() {
+          window.location.href = getAbsolutePath() + "/buscador";
+        }
+        if ($("#edit-keys-sel--2").length != 0) {
+          sessionStorage.setItem('oldsearch', document.getElementById("edit-keys-sel--2").value);
+          var oldsearch = sessionStorage.getItem('oldsearch');
+        }
+
+      });
+      // vuelve arriba con felcha al pie de la pagina
+      $("#block-vuelvearriba #back-to-top").once().on("click", function () {
+        $("html, body").animate({
+          scrollTop: 0
+        }, 1000);
+      });
+
+      // usados solo para el block de lo mas en hp
+      $("#tabs").tabs();
+
+      // desarrollado con Slick Carousel http://kenwheeler.github.io/slick/
+      // carousel banner de homepage
+      $('.block-views-blockbanner-block-1 .view-content').once().slick({
+        arrows: false,
+        dots: true,
+        autoplay: true,
+        speed: 1000,
+        autoplaySpeed: 5000,
+        accessibility: true,
+        slideToScroll: 1,
+        infinite: true,
+      });
+
+
+
+      /* si la noticia tiene adjunto (o multimedia o enlace) tengo que moverlo a la derecha */
+      if ($('.node--type-sas-noticia').hasClass('utilidades-derecha') || $('.node--type-sascomunicado').hasClass('utilidades-derecha')) {
+        $('.block-views-blockutilidades-noticia-block-3').insertAfter('.noticia-cuerpo-left'); // enlace o boton
+        $('.block-views-blockutilidades-noticia-block-1').insertAfter('.noticia-cuerpo-left'); // adjunto
+        $('.block-views-blockutilidades-noticia-block-2').insertAfter('.noticia-cuerpo-left'); // video
+      }
+
+
+      /** enlaces de utilidad en col. derecha de la página  */
+      if ($('.enlace-derecha .views-field-nothing ul li.enlace-activo-0').length != $('.enlace-derecha .views-field-nothing ul li').length) {
+        $('.enlace-derecha').addClass('float-dx');
+        $('#block-sas2018-content').addClass('float-sx');
+      }
+
+      /** si tengo bloques en columna de derecha con enlaces pero no tengo los enlaces dinamicos (normativa, documento, estadisticas, ...) tengo que flotarlos a la derecha */
+      if ($('.botones-dx .view-content').length) {
+        $('#block-sas2018-content').addClass('float-sx');
+      }
+
+      /* botones de la derecha que abren en ventana nueva */
+      $('.ventana-nueva').attr('target', '_blank');
+
+      /** intro del tipo contenido basico */
+      $('.intro-cont').insertAfter('#block-sas2018-page-title');
+
+      /** todos los pdf en ventana nueva */
+      $('a[href$=".pdf"]').attr("target", "_blank");
+      $('a[href$=".xls"]').attr("target", "_blank");
+      $('a[href$=".xlsx"]').attr("target", "_blank");
+
+      /** scroll reveal para las portadilla y la portada */
+      ScrollReveal().reveal('.grid-elem', {
+        duration: 500,
+        scale: 0.5
+      });
+      ScrollReveal().reveal('#enlaces-salud-mental li', {
+        duration: 500,
+        delay: 350,
+        scale: 0.5
+      });
+
+      /**
+       * el boton borrar no funciona en vistas a block con filtros expuestos, vistas:
+       * /profesionales/recursos-para-profesionales/precios-publicos
+       * /profesionales/guia-laboral/relaciones-sindicales/juntas-de-personal-en-centros-sanitarios
+       * /profesionales/guia-laboral/plantilla-de-centros-sanitarios
+       * /profesionales/ofertas-de-empleo/bolsa-de-empleo/direcciones-postales-comisiones-de-valoracion
+       */
+      $('.borrar-recarga').click(function () {
+        location.reload();
+      });
+      $('.borrar-recarga').insertAfter('.view-filters form .form-submit');
+
+      /** poster para los videos */
+      $('video:not(#videoarea)').attr('poster', '/servicioandaluzdesalud/themes/sas2018/img/poster.png');
+
+      $('.sas-back-button').once().click(function (e) {
+        e.preventDefault();
+        history.back();
+      });
+
+      if ($('#views-exposed-form-sascentroreferencia-embed-1').length) {
+        $('#views-exposed-form-sascentroreferencia-embed-1 select[name="field_sas_centro_target_id"]').once().change(function () {
+          var reference_centers_areas = drupalSettings.sas_center_views.reference_centers_areas;
+          var selected = $(this).val();
+          if (reference_centers_areas[selected]) {
+            $('#views-exposed-form-sascentroreferencia-embed-1 select[name="sas_centroreferencia_area_target_id"] option').each(function () {
+              if (reference_centers_areas[selected].indexOf($(this).attr('value')) != -1) {
+                $(this).removeAttr('disabled');
+              } else {
+                $(this).attr('disabled', 'disabled');
+              }
+            });
+          } else {
+            $('#views-exposed-form-sascentroreferencia-embed-1 select[name="sas_centroreferencia_area_target_id"] option').each(function () {
+              $(this).removeAttr('disabled');
+            });
+          }
+        });
+      }
+      /* prorroga de contratos */
+      if (jQuery('body').hasClass('node-61718')) {
+        var lista = jQuery('.view-content .view-grouping-content .item-list:first ul');
+        var listaElem = lista.children('li');
+        listaElem.sort(function (a, b) {
+          var A = jQuery(a).text().toUpperCase();
+          var B = jQuery(b).text().toUpperCase();
+          return (A < B) ? -1 : (A > B) ? 1 : 0;
+        });
+        jQuery.each(listaElem, function (id, elemento) {
+          listaElem.append(elemento);
+        });
+      };
+
+      // START covid19 scripts
+
+      function show_hide(id) {
+        var element = document.getElementById(id);
+        if (element.classList.contains('block')) {
+          element.classList.remove('block');
+          element.classList.add('hidden');
+        } else {
+          element.classList.remove('hidden');
+          element.classList.add('block');
+        }
+
+
+      }
+
+      function hide_all(id) {
+        var element = document.getElementById(id);
+        element.classList.remove('block');
+        element.classList.add('hidden');
+      }
+
+      function show_hide_page_content(from_id, to_id) {
+        var from = document.getElementById(from_id);
+        var to = document.getElementById(to_id);
+        autoTestScrollTo(jQuery('.test-covid19-page'));
+
+        // if (from.classList.contains('block')) {
+        from.classList.remove('block');
+        from.classList.add('hidden');
+
+        to.classList.remove('hidden');
+        to.classList.add('block');
+        // } else {
+        //     to.classList.remove('block');
+        //     to.classList.add('hidden');
+        //
+        //     from.classList.remove('hidden');
+        //     from.classList.add('block');
+        // }
+
+      }
+
+      function autoTestScrollTo(element) {
+        jQuery('html, body').animate({
+          'scrollTop': element.offset().top - 150
+        }, 'slow', 'swing');
+      }
+
+      if ($('.messages__wrapper').length) {
+        $('.messages__wrapper .messages button').once().click(function () {
+          var messagelist = $(this).closest('.messages')
+          $(this).closest('div').remove();
+          if (!messagelist.find('div').length) {
+            messagelist.remove();
+          }
+        });
+      }
+
+      //prueba xls cartera
+      if (context === document) {
+        // Asegurarse de que no se registre el listener varias veces
+        const button = document.getElementById("download-xls-button");
+
+        // Si el botón ya tiene el event listener, no lo volvemos a agregar
+        if (button && !button.hasAttribute("data-listener-added")) {
+          button.setAttribute("data-listener-added", "true");  // Marcamos el botón para indicar que ya tiene el listener
+
+          button.addEventListener("click", function handleDownloadClick() {
+            // Deshabilitar el botón para evitar más clics
+            button.disabled = true;
+
+            // Capturar solo los elementos con la clase 'view-grouping'
+            let elements = document.querySelectorAll(".view-grouping");
+            let htmlContent = "";
+            let namecartera = document.querySelector(".view-grouping-header").textContent.trim();
+
+            elements.forEach(el => {
+              let boton = el.querySelector(".volver-button");
+              if (boton) {
+                //boton.remove(); // Elimina el botón si lo encuentra
+              }
+              htmlContent += el.outerHTML; // Agregar cada div con clase 'view-grouping'
+            });
+
+            if (htmlContent.trim() === "") {
+              alert("No hay contenido para exportar.");
+              button.disabled = false;  // Volver a habilitar el botón si no hay contenido
+              return;
+            }
+
+            // Enviar al backend de Drupal
+            fetch('/descarga-cartera', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ html_content: htmlContent })
+            })
+              .then(response => response.blob())  // Recibe el archivo como Blob
+              .then(blob => {
+                let a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = namecartera + ".xls";  // Nombre del archivo
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              })
+              .catch(error => console.error("Error al descargar el archivo:", error))
+              .finally(() => {
+                // Deshabilitar el botón y evitar más clics
+                button.disabled = false;
+              });
+          });
+        }
+      }
+    }
+  };
+
+  /* cambio para el problema de la caché en el solr */
+  Drupal.behaviors.tokenBuscador = {
+    attach: function (context, settings) {
+      jQuery("form#views-exposed-form-buscador-page-5").submit(function () {
+        var ttoken = Date.now();
+
+        if (jQuery("input#ttoken").length == 0) {
+          var input = document.createElement("input");
+          input.id = "ttoken";
+          input.type = "hidden";
+          input.name = "ttoken";
+          input.value = ttoken;
+          jQuery(this).append(input);
+        }
+      });
+    }
+  };
+
+
+  /* class especifica para paginas del pie (sirve solo para la sitemap, en las otras 5 paginas se ha anadido con body class) */
+  Drupal.behaviors.pieClass = {
+    attach: function (context, settings) {
+
+      var portadillas = ['aviso-legal', 'politica-editorial', 'politica-de-privacidad', 'derechos-de-los-usuarios', 'contacto', 'sitemap'];
+      var currUrl = window.location.pathname;
+      var splitUrl = currUrl.split('/');
+      if ($.inArray(splitUrl[2], portadillas) !== -1) {
+        $('body').addClass('menu-footer-link');
+      }
+
+    }
+  }
+
+  /* class especifica para las 4 portadillas */
+  /*** no sirve porque estamos usando el modulo body class ***/
+  /*Drupal.behaviors.portadillaClass = {
+    attach: function (context, settings) {
+
+      if($('body').hasClass('portadilla')){
+        var portadillas = ['el-sas', 'ciudadania', 'profesionales', 'proveedores'];
+        var currUrl = window.location.pathname;
+        var splitUrl = currUrl.split('/');
+        if ($.inArray(splitUrl[2], portadillas) !== -1) {
+          $('body').addClass('portadilla');
+        }
+      }
+
+    }
+  }*/
+
+  /* la fecha de actualizacion de los cont. basicos cambia de sitio dependiendo del resize de la ventana */
+  Drupal.behaviors.muevofecha = {
+    attach: function (context, settings) {
+      /* si hay col. derecha la fecha de actualizacion va debajo de todo */
+      $(window).resize(function () {
+        var viewport = $(window).width();
+        //console.log('dim: ' + viewport);
+        if (viewport <= 1023) {
+          if ($('#block-sas2018-content').hasClass('float-sx')) {
+            $('.field--name-sas-xfecha-actualizacion-dt').insertAfter('#block-views-block-botones-columna-derecha-block-1');
+          }
+        } else {
+          if ($('#block-sas2018-content').hasClass('float-sx')) {
+            $('.field--name-sas-xfecha-actualizacion-dt').insertAfter('.field--name-sas-contenidobasico-descripcion');
+          }
+        }
+      });
+    }
+  };
+
+  /**
+   * muestro etiquetas activas en el filtro normativa dependiendo de el apartando desde el que vengo
+   */
+  Drupal.behaviors.etiquetasactivas = {
+    attach: function (context, settings) {
+      var taxonomy_tags_name;
+      var body_class;
+      if ($('body').hasClass('path-vista-normativa')) {
+        taxonomy_tags_name = '#edit-field-tags-target-id--wrapper';
+        body_class = 'path-vista-normativa';
+      } else if ($('body').hasClass('path-vista-normativa-profesionales')) {
+        taxonomy_tags_name = '#edit-field-tags-target-id--wrapper';
+        body_class = 'path-vista-normativa-profesionales';
+      } else if ($('body').hasClass('path-enlaces-basico')) { // 03.05.2019 esta vista no se esta usando y no existe
+        taxonomy_tags_name = '#edit-sasenlacesbasicos-etiqueta-target-id';
+        body_class = 'path-enlaces-basico';
+      } else if ($('body').hasClass('path-documentos')) {
+        taxonomy_tags_name = '#edit-field-tags-target-id--wrapper';
+        body_class = 'path-documentos';
+      } else if ($('body').hasClass('path-archivo-comunicado')) {
+        var taxonomy_tags_name = "#edit-sas-xseccion-target-id--wrapper";
+        body_class = 'path-archivo-comunicado';
+      } else if ($('body').hasClass('path-novedades')) {
+        var taxonomy_tags_name = "#edit-term-node-tid-depth--wrapper";
+        body_class = 'path-novedades';
+      }
+
+      if ($('body', context).once('etiquetasactivas').hasClass(body_class)) {
+        var curr_url = $(location).attr('href');
+        var after_almoadilla = curr_url.split('#')[1];
+        if (after_almoadilla !== undefined) {
+          $('<div class="etiquetas-activas"><div class="label-etiquesta-activas">Filtrando por: </div><div class="cont-etiquetas-activas" />').insertBefore('.view-filters');
+          after_almoadilla = after_almoadilla.split('=')[1];
+          var sel_terminos = after_almoadilla.split(',');
+          $.each(sel_terminos, function (index, item) {
+            $(taxonomy_tags_name + ' .form-type-checkbox input').each(function () {
+              var actual_checkbox = $(this).attr('value');
+              if (actual_checkbox == item) {
+                $('.cont-etiquetas-activas').append('<span>' + $(this).siblings('label').text() + '</span>');
+              }
+            });
+          });
+        }
+      }
+      if (jQuery('body').hasClass('contenedor-estad')) {
+        jQuery("#tabs").tabs({
+          active: -1
+        });
+      }
+    }
+  };
+
+
+
+  /**
+   * Menu hamburger al lado de título de página.
+   * muestra solo segundos y terceros niveles.
+   * los segundos niveles que tienen hijos están cerrados y se abren con el click en la flecha roja a la derecha.
+   *
+   * Se usa lo mismo para un bloque estatico para las utilidades (normativa, enlaces interes, estadisticas) y otro
+   * bloque para los enlaces del pie (sitemap, aviso legal, ...)
+   */
+  Drupal.behaviors.hamburger = {
+    attach: function (context, settings) {
+
+      // añado uno <span> para abrir/cerrar solo en los enlaces que tienen hijos
+      $('#hamburger_menu-wrapper ul.menu > li.menu-item--expanded > a').once().each(function () {
+        $('<span class="expande-hijos">&nbsp;</span>').insertAfter(this);
+      });
+
+      $('#hamburger_menu-wrapper ol.menu > li.menu-item--expanded > a').once().each(function () {
+        $('<span class="expande-hijos">&nbsp;</span>').insertAfter(this);
+      });
+
+      // escondo los hijos
+      $('#hamburger_menu-wrapper ul.menu > li.menu-item--expanded ul.menu').hide();
+      // al click <span class="expande-hijos"> muestro los terceros niveles
+      $('#hamburger_menu-wrapper .expande-hijos').once().click(function () {
+        $(this).toggleClass('cierra-hijos');
+        $(this).siblings('ul.menu').slideToggle();
+      });
+
+      $('#hamburger_menu-wrapper ol.menu > li.menu-item--expanded ol.menu').hide();
+      // al click <span class="expande-hijos"> muestro los terceros niveles
+      $('#hamburger_menu-wrapper .expande-hijos').once().click(function () {
+        $(this).toggleClass('cierra-hijos');
+        $(this).siblings('ol.menu').slideToggle();
+      });
+
+      if ($('#hamburger_menu-wrapper').length) {
+        $('#hamburger_menu-wrapper').hide();
+        $('.layout-no-sidebars h1.page-title').once().prepend('<button id="sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button><button id="hider-sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+        // en cartera servicio el hamburguesa esta en otra posicion
+        $('.layout-sidebar-first .csap-title').once().prepend('<button id="sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+      }
+
+
+      $('#sas-hamburger').once().on("click", function (e) {
+        e.preventDefault();
+        if ($(this).hasClass('hamburger-abierto')) { // esta abierto?
+          $(this).removeClass('hamburger-abierto');
+          $('body').removeClass('hamburger-abierto');
+          $('#hamburger_menu-wrapper').slideUp();
+        } else { // esta cerrado
+          $(this).addClass('hamburger-abierto');
+          $('body').addClass('hamburger-abierto');
+          $('#hamburger_menu-wrapper').slideDown();
+          $(this).hide();
+          $('#hider-sas-hamburger').show();
+        }
+      });
+      $('#hider-sas-hamburger').once().on("click", function (v) {
+        v.preventDefault();
+        $(this).hide();
+        $('#sas-hamburger').show();
+      });
+
+
+      $(document).mouseup(function (h) { // clic en cualquier punto de la pagina
+        var container = $('#hamburger_menu-wrapper');
+        if ($('body').hasClass('hamburger-abierto') && !container.is(h.target) && container.has(h.target).length === 0) {
+          container.slideUp();
+          $('body').removeClass('hamburger-abierto');
+          $('#sas-hamburger').removeClass('hamburger-abierto').show();
+          $('#hider-sas-hamburger').hide();
+        }
+      });
+      $(document).keydown(function (h) { // tecla esc
+        if (h.keyCode === 27 && $('body').hasClass('hamburger-abierto')) {
+          $('#hamburger_menu-wrapper').slideUp();
+          $('body').removeClass('hamburger-abierto');
+          $('#sas-hamburger').removeClass('hamburger-abierto').show();
+          $('#hider-sas-hamburger').hide();
+        }
+      });
+    }
+  };
+
+  /**
+   * menu utilidades como menu principal
+   */
+  Drupal.behaviors.hambutilidades = {
+    attach: function (context, settings) {
+      if (0 ||
+        $('body').hasClass('path-enlaces-interes') ||
+        $('body').hasClass('path-vista-normativa') ||
+        $('body').hasClass('path-archivo-estadisticas') ||
+        $('body').hasClass('path-todas-noticia') ||
+        $('body').hasClass('path-novedades') ||
+        $('body').hasClass('suscripcion') ||
+        $('body').hasClass('path-archivo-comunicado') ||
+        $('body').hasClass('path-archivo-publicaciones') ||
+        $('.view-display-id-embed_1').length
+      )
+        $('h1.page-title').once().prepend('<button id="sas-hamburger" class="utils-hamburger hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+
+      $('.utils-hamburger').once().on("click", function (e) {
+        e.preventDefault();
+        $('body').toggleClass('hamburger-abierto');
+        $('.menu-utils').slideToggle();
+      });
+    }
+  };
+
+  /**
+   *
+   */
+  Drupal.behaviors.hambutilidades2 = {
+    attach: function (context, settings) {
+      if ($('body').hasClass('contenedor-estad')) {
+        $("#tabs").tabs({
+          active: -1
+        });
+      }
+    }
+  };
+
+  /**
+   * menu pie como menu principal
+   */
+  Drupal.behaviors.hambpie = {
+    attach: function (context, settings) {
+      if ($('body').hasClass('menu-footer-link') || $('body').hasClass('path-sitemap'))
+        $('h1.page-title').once().prepend('<button id="sas-hamburger" class="pie-hamburger hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+
+      $('.pie-hamburger').once().on("click", function (e) {
+        e.preventDefault();
+        $('.menu-pie').slideToggle();
+      });
+    }
+  };
+
+  /**
+   * menu hamburguesa ultra custom
+   * en las 4 portadillas se ha puesto el tick en Sticky y con un tpl twig se añade la class
+   * "pagina-portadilla" o "pagina-normal" segun el caso, el siguiente codigo se ejecuta solo
+   * en las "pagina-normal"
+   */
+  Drupal.behaviors.menuultracustom = {
+    attach: function (context, settings) {
+
+      // Si necesitamos  incluir una página más solo necesitamos meter
+      // la clase del body de la ruta de dicha página.
+      if (1
+        && (0
+          || $('div.vista-pagina').hasClass('pinta-menu')
+          || $('body').hasClass('pagina-normal')
+          || $('body').hasClass('view-plantilla-centros-sanitarios-unica-page-1')
+          && !$('body').hasClass('path-frontpage')
+        )) {
+        var m = $('#hamburger_menu-wrapper nav div.content');
+        while (m.length) {
+          m = m.find('.menu-item--active-trail');
+        }
+        m.end().last().parent().addClass('reemplazado');
+        m.end().last().parent().css('display', 'initial');
+        var trozo = m.end().last().parent();
+        $('#hamburger_menu-wrapper nav div.content').append(trozo);
+        $('#hamburger_menu-wrapper nav div.content > ul:not(.reemplazado)').remove();
+      }
+    }
+  };
+
+  /**
+   * En las portadillas el menu en col. izquierda se comporta como el hamburguesa
+   */
+  Drupal.behaviors.menuportadilla = {
+    attach: function (context, settings) {
+      // añado uno <span> para abrir/cerrar solo en los enlaces que tienen hijos
+      $('.menu-fp-section ul.menu > li.menu-item--expanded > a').once().each(function () {
+        $('<span class="expande-hijos">&nbsp;</span>').insertAfter(this);
+      });
+
+      // escondo los hijos
+      $('.menu-fp-section ul.menu > li.menu-item--expanded ul.menu').hide();
+      // al click <span class="expande-hijos"> muestro los terceros niveles
+      $('.menu-fp-section .expande-hijos').once().click(function () {
+        $(this).toggleClass('cierra-hijos');
+        $(this).siblings('ul.menu').slideToggle();
+      });
+
+      $('.menu-fp-section ol.menu > li.menu-item--expanded > a').once().each(function () {
+        $('<span class="expande-hijos">&nbsp;</span>').insertAfter(this);
+      });
+
+      // escondo los hijos
+      $('.menu-fp-section ol.menu > li.menu-item--expanded ol.menu').hide();
+      // al click <span class="expande-hijos"> muestro los terceros niveles
+      $('.menu-fp-section .expande-hijos').once().click(function () {
+        $(this).toggleClass('cierra-hijos');
+        $(this).siblings('ol.menu').slideToggle();
+      });
+    }
+  };
+
+
+
+  Drupal.behaviors.organigrama = {
+    attach: function (context, settings) {
+      /*
+       * .dir-ger
+       * .dir-asist
+       * .dir-prof
+       * .dir-eco
+       * .ase-jur
+       * .empresa-pub
+       * .costa-sol
+       * .almeria
+       * .bajo-guad
+       * .alto-guad
+       * .int-central
+       **/
+      var datacuadro;
+      if ($('.organigrama-sas').length) {
+        $('.padre-elem').once('organigrama').click(function () {
+          datacuadro = $(this).attr('data-cuadro');
+          $('table.organigrama-encargos tr td').css('background', '#ffffff');
+          $('html, body').animate({
+            scrollTop: $('[name="' + datacuadro + '"]').offset().top
+          }, 500);
+          $('table.organigrama-encargos [name="' + datacuadro + '"] td').css('background', '#f4f4f4');
+        });
+      }
+
+    }
+  };
+
+  /**
+   * custom datepicker usando la class asignada por Better exposed filters (bef)
+   */
+  Drupal.behaviors.customDatepicker = {
+    attach: function (context, settings) {
+      // repo. documentos
+      $('.view-documentos .bef-datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '-1977:+0'
+      });
+      // repo. normativa
+      $('.view-vista-normativa .bef-datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '1977:+0'
+      });
+      // repo. noticias y novedades
+      $('.archivo-novedades .bef-datepicker, .archivo-noticias .bef-datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '2018:+0'
+      });
+      // buscador
+      jQuery('.block-busqueda .bef-datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '-1977:+0'
+      });
+
+      // buscador avanzado
+      // jQuery('#fecha-de-actualizacion-min').datepicker({
+      //   dateFormat: 'dd/mm/yy',
+      // });
+    }
+  };
+
+  /** preguntas frecuentes */
+  Drupal.behaviors.faqscroll = {
+    attach: function (context, settings) {
+      $('.faq-scroll').once().on("click", function (j) {
+        j.preventDefault();
+        var position = $($(this).attr('href')).offset().top;
+        $('html, body').animate({
+          scrollTop: position
+        });
+      });
+
+      $('.vuelve-up').once().on("click", function (k) {
+        k.preventDefault();
+        var positionpreguntas = $('#grupo-preguntas').offset().top;
+        $('html, body').animate({
+          scrollTop: positionpreguntas
+        });
+      });
+    }
+  };
+
+  /**
+   * Contratos menores
+   */
+  Drupal.behaviors.tabscontratos = {
+    attach: function (context, settings) {
+
+      $('.view-informes-de-contratos .view-content .view-grouping').hide();
+
+      $('.view-informes-de-contratos .view-content .view-grouping .view-grouping-header').once().each(function () {
+        $(this).insertBefore('.view-informes-de-contratos .view-content');
+      });
+
+      $('.view-informes-de-contratos .view-grouping-header').once('tabscontratos').wrapAll('<div class="view-head" />');
+
+      var indexyear = 0;
+      $('.view-informes-de-contratos .view-grouping-header').click(function () {
+        $(this).addClass('year-activo').siblings().removeClass('year-activo');
+        var indexyear = $('.view-informes-de-contratos .view-grouping-header').index(this); // base 0
+        $('.view-content .view-grouping').hide();
+        $('.view-content .view-grouping:eq(' + indexyear + ')').show();
+      });
+
+    }
+  };
+
+
+  /** OEP 2016-2017-Estabilización, plazas ofertadas
+   * /profesionales/ofertas-de-empleo/oferta-de-empleo-publico/oep-2016-2017-estabilizacion/oep-2016-2017-estabilizacion-plazas-ofertadas */
+  Drupal.behaviors.mifiltros = {
+    attach: function (context, settings) {
+
+      if ($('table.estado2017').length) {
+        var index = "col1";
+        $('table.estado2017 td.derecha:not(.' + index + ')').hide();
+        $('table.estado2017 td.derecha.' + index + '').show();
+        $('table.estado2017 th:not(.' + index + ')').hide();
+        $('table.estado2017 th.' + index + '').show();
+        $('table.estado2017 .fija').show();
+        $('input[type="radio"][name="col"]').click(function () {
+          index = $(this).val(); //.substr(5);
+          $('table.estado2017 td.derecha:not(.' + index + ')').hide();
+          $('table.estado2017 td.derecha.' + index + '').show();
+          $('table.estado2017 th:not(.' + index + ')').hide();
+          $('table.estado2017 th.' + index + '').show();
+          $('table.estado2017 .fija').show();
+        });
+
+        $('select').click(function () {
+          index = $(this).val(); //.substr(5);
+          $('table.estado2017 td.derecha:not(.' + index + ')').hide();
+          $('table.estado2017 td.derecha.' + index + '').show();
+          $('table.estado2017 th:not(.' + index + ')').hide();
+          $('table.estado2017 th.' + index + '').show();
+          $('table.estado2017 .fija').show();
+        });
+      }
+
+    }
+  };
+
+
+  /** /profesionales/cartera-de-servicios/atencion-primaria */
+  Drupal.behaviors.menucarteraservicios = {
+    attach: function (context, settings) {
+      if ($('.menu-cartera-servicios').once('carteraservicios').length) {
+        $('.region-sidebar-first ul.menu .menu-item--expanded > a').removeAttr('href'); // todos los que tienen hijos no llevan a nueva pagina
+
+        $('.region-sidebar-first ul.menu .menu-item--expanded > a').click(function () { // al click sobre un padre, abre los hijos
+          $(this).siblings('ul.menu').slideToggle();
+        });
+
+        $('ul.menu .menu-item--active-trail > a').trigger('click');
+      }
+
+      var carteraUrl = window.location.pathname;
+      var carteraSplit = carteraUrl.split('/');
+      if (carteraSplit[4] === 'atencion-primaria') {
+        //console.log('ci sono');
+        jQuery('.layout-sidebar-first .csap-title').once().prepend('<button id="sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button><button id="hider-sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+      }
+
+    }
+  };
+
+  Drupal.behaviors.menucarteraservicios = {
+    attach: function (context, settings) {
+      if ($('.menu-cartera-servicios').once('carteraservicios').length) {
+        $('.region-sidebar-first ol.menu .menu-item--expanded > a').removeAttr('href'); // todos los que tienen hijos no llevan a nueva pagina
+
+        $('.region-sidebar-first ol.menu .menu-item--expanded > a').click(function () { // al click sobre un padre, abre los hijos
+          $(this).siblings('ol.menu').slideToggle();
+        });
+
+        $('ol.menu .menu-item--active-trail > a').trigger('click');
+      }
+
+      var carteraUrl = window.location.pathname;
+      var carteraSplit = carteraUrl.split('/');
+      if (carteraSplit[4] === 'atencion-primaria') {
+        //console.log('ci sono');
+        jQuery('.layout-sidebar-first .csap-title').once().prepend('<button id="sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button><button id="hider-sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+      }
+
+    }
+  };
+
+
+  /**
+   * Centro de referencia UPRA
+   */
+  /*Drupal.behaviors.carteraserviciosupra = {
+    attach: function (context, settings) {
+      $('.view-centros-de-referencia .view-grouping-header').addClass('accordion-big-tit-cartera');
+
+      $('.accordion-big-tit-cartera').attr('tabindex', '0');
+      $('.accordion-big-tit-cartera').attr('role', 'button');
+
+      $('.accordion-big-tit-cartera').once().on('click keydown', function (q) {
+        q.preventDefault();
+        var codebutton = q.which;
+        if (q.type == 'click' || codebutton == 13 || codebutton == 32) {
+          if ($(this).hasClass('activo')) {
+            $(this).removeClass('activo').next('div').removeClass('contenido-activo-cartera');
+          } else {
+            $(this).addClass('activo').next('div').addClass('contenido-activo-cartera');
+          }
+
+        }
+      });
+    }
+  };*/
+
+  /**
+   * Calendario festivos cambios pedidos por el cliente sobre modo de visualizar la lista
+   */
+  Drupal.behaviors.callaboral = {
+    attach: function (context, settings) {
+      if ($('#block-sas2018-content .vista-sasfestivos').length) {
+        $('.view-content').insertAfter('.listado-normativas-calendario');
+      }
+    }
+  };
+
+  /**
+   * Listas de espera con mapa clicable
+   */
+  Drupal.behaviors.listaespera = {
+    attach: function (context, settings) {
+      // boton para volver al buscador de listas de espera
+      if ($('body').once().hasClass('page-node-type-lista-de-espera')) {
+        $('.field--name-field-espera-body').once().append('<a class="boton-volver" href="#" onClick="window.history.back(); return false;">Volver</a>');
+      }
+
+      var provactiva = $('#edit-field-espera-provincia-target-id option:selected').val();
+      if (provactiva != 'All') {
+        $('.mapa-andalucia path').each(function () {
+          if ($(this).data('id-provincia') == provactiva) {
+            $('.mapa-andalucia path').removeClass('prov-activa');
+            $(this).addClass('prov-activa');
+          }
+        });
+      }
+    }
+  };
+
+  /**
+   * Add sas-extlink class based on allowed domains.
+   */
+  Drupal.behaviors.sas_extlink = {
+    attach: function (context, settings) {
+      $(document).ready(function () {
+        var body = $('body');
+        var domains = drupalSettings.sas2018.intDomains;
+        var excludeDomain = [];
+
+        domains.forEach(function (domain) {
+          excludeDomain.push('[href*="' + domain + '"]');
+        });
+        excludeDomain.push('a[href$=".pdf"]');
+        excludeDomain.push('a[href$=".xls"]');
+        excludeDomain.push('a[href$=".csv"]');
+        excludeDomain.push('a[href$=".PDF"]');
+        excludeDomain.push('a[href$=".XLS"]');
+        excludeDomain.push('a[href$=".CSV"]');
+
+        var classToExclude = excludeDomain.join(',');
+
+        $('a[href^="//"]', body).not(classToExclude).addClass('sas-extlink');
+        $('a[href^="http://"]', body).not(classToExclude).addClass('sas-extlink');
+        $('a[href^="https://"]', body).not(classToExclude).addClass('sas-extlink');
+      });
+    }
+  };
+
+  /**
+   * Modify buttons ColorBox, add Title.
+   */
+  Drupal.behaviors.buttonsColorbox = {
+    attach: function (context, settings) {
+      $(document).ready(function () {
+        var buttonPrev = document.getElementById('cboxPrevious');
+        var buttonNext = document.getElementById('cboxNext');
+        var buttonSlide = document.getElementById('cboxSlideshow');
+        if (typeof buttonPrev != 'undefined' && buttonPrev != null) {
+          buttonPrev.title = "Previous";
+        }
+        if (typeof buttonNext != 'undefined' && buttonNext != null) {
+          buttonNext.title = "Next";
+        }
+        if (typeof buttonSlide != 'undefined' && buttonSlide != null) {
+          buttonSlide.title = "Slideshow";
+        }
+      });
+
+      //Add title sas-hamburguer
+      if (typeof document.getElementById('sas-hamburger') != 'undefined' && document.getElementById('sas-hamburger') != null) {
+        document.getElementById('sas-hamburger').title = "Menú hamburguesa";
+      }
+    }
+  }
+
+  // Add prorrogas de contrato {POSIBLLEMENTE OBSOLETO}
+  Drupal.behaviors.prorrogasContrato = {
+    attach: function (context, settings) {
+      if (jQuery('body').hasClass('node-61718')) {
+        var lista = jQuery('.view-content .view-grouping-content .item-list:first ul');
+        var listaElem = lista.children('li');
+        listaElem.sort(function (a, b) {
+          var A = jQuery(a).text().toUpperCase();
+          var B = jQuery(b).text().toUpperCase();
+          return (A < B) ? -1 : (A > B) ? 1 : 0;
+        });
+        jQuery.each(listaElem, function (id, elemento) {
+          listaElem.append(elemento);
+        });
+      };
+    }
+  }
+
+  Drupal.behaviors.novedades = {
+    attach: function (context, settings) {
+      if (jQuery('body.role-anonymous').length && jQuery('#toolbar-administration').length) {
+        jQuery('#toolbar-administration').remove();
+        jQuery('body').removeClass('toolbar-tray-open');
+        jQuery('body').removeClass('toolbar-horizontal');
+        jQuery('body').removeClass('toolbar-fixed');
+        jQuery('body').removeClass('toolbar-removed');
+        jQuery('#mm-0').css('padding-top', 0);
+      }
+    }
+  }
+
+  //Prueba scroll y mensaje de ayuda para formulario sugerencias
+
+  Drupal.behaviors.scrollFormularioSugerencia = {
+    attach: function (context, settings) {
+      if (jQuery('.suggestions-area__content').length) {
+        jQuery('.suggestions-area__content input[type="radio"]').click(function () {
+          //Se mueve el div de mensaje al fieldset que contiene el grupo de radio buttons
+          jQuery('.suggestions-area-messages').appendTo(jQuery(this).closest('fieldset'));
+          //Se crea el destino del scroll de manera dinámica
+          var ayuda = jQuery(this).closest('fieldset');
+          //Se comprueba si para el radio button existe mensaje antes de realizar la animación
+          if (jQuery('.suggestions-area-messages__message.js-' + jQuery(this).val()).length != 0) {
+            //Desactivo animación al hacer scroll manual
+            jQuery('html, body').on("scroll mousedown wheel DOMMouseScroll mousewheel keyup touchmove", function () {
+              jQuery('html, body').stop();
+            });
+            //Inicio la animación de scroll
+            jQuery('html, body').animate({
+              scrollTop: ayuda.offset().top
+            }, 1200);
+          }
+        });
+      }
+
+    }
+  }
+
+  Drupal.behaviors.playlistvideo = {
+    attach: function (context, settings) {
+
+      /**
+       * en algunas paginas necesitamos una lista de reproducion de video, como son pocos casos se ha decidido
+       * usar una solucion js.
+       * hay que crear una lista no ordenada con class playlist y cada elemento de la lista se enlaza usando el modulo linkit
+       * (el mismo usado para incrustar los pdf).
+       * El js se encarga de crear el elemento html <video>, luego recurre todo el listado, quita los enlaces y usa el attributo
+       * url para generar un data-attribute para el <li>. Al click en el <li> se dispara la inclusion del video en el player.
+       * http: //resuelve.ayesa.link:7001/node/20151/edit
+       */
+
+      $('video:not(.videoarea)').attr('poster', '/servicioandaluzdesalud/sites/default/files/2020-03/poster_nuevo.png');
+
+      if ($('ul.playlist').once().length) {
+
+        // por cada elemento de la lista uso el titulo y la url
+        $('ul.playlist li a').each(function () {
+          var url_video = $(this).attr('href');
+          var title_video = $(this).text();
+          $(this).closest('li').html(title_video).attr('data-urlvideo', url_video);
+        });
+
+        // al clic en elem. lista añado el video
+        $('ul.playlist li').on('click', function () {
+          $('.videoarea').attr({
+            'src': $(this).attr('data-urlvideo'),
+            'autoplay': 'autoplay'
+          })
+        });
+
+        var primer_video = $('ul.playlist li:eq(0)').attr('data-urlvideo');
+        // declaro el elemento video
+        $('<video class="videoarea" controls="controls" src="' + primer_video + '" autobuffer poster="/servicioandaluzdesalud/themes/sas2018/img/poster.png"></video>').once().insertBefore('.playlist');
+      }
+
+
+      /**
+       * Nos han pedido una segunda version de la lista de reproducion un poco mas compleja a nivel de html
+       * se usa la misma logica que la lista simple(http://resuelve.ayesa.link:7001/node/20190)
+       */
+      if ($('ul.playlist2').once().length) {
+
+        $('ul.playlist2').hide();
+        // creo el contenedor de la lista de repr. y el video
+        $('<div class="playlist2-wrapper"><div class="video-lista"><ul></ul></ul></div><div class="video-video"><video class="videoarea" controls="controls" src="" autobuffer poster="/servicioandaluzdesalud/themes/sas2018/img/poster.png"></video><div class="video-descriptions"></div></div></div>').once().insertBefore('.playlist2');
+
+        // por cada elemento de la lista uso el titulo y la url
+        $('ul.playlist2 li').each(function () {
+
+          var url_video = $(this).find('.video-url').attr('href');
+          var title_video = $(this).find('.video-url').text();
+          var descr_video = $(this).find('.video-descr').prop('outerHTML');
+
+          if (descr_video == null) {
+            descr_video = '<p class="video-descr">&nbsp;</p>';
+          }
+
+          $('<li data-urlvideo="' + url_video + '">' + title_video + '</li>').appendTo('.video-lista ul');
+          $('<div>' + descr_video + '</div>').appendTo('.playlist2-wrapper .video-descriptions').hide();
+        });
+
+        // al clic en elem. lista añado el video
+        $('.video-lista ul li').on('click', function () {
+          var index_elem = $(this).index();
+          $('.video-lista ul li').removeClass('activo');
+          $(this).addClass('activo');
+          $('.playlist2-wrapper .video-descriptions div').fadeOut();
+          $('.playlist2-wrapper .video-descriptions div:eq(' + index_elem + ')').fadeIn();
+          $('.video-video .videoarea').attr({
+            'src': $(this).attr('data-urlvideo'),
+            'autoplay': 'autoplay'
+          })
+        });
+      }
+
+      if ($('ul.playlist3').once().length) {
+
+        $('ul.playlist3').hide();
+        // creo el contenedor de la lista de repr. y el video
+        $('<div class="playlist3-wrapper"><div class="video-lista"><ul></ul></ul></div><div class="video-video"><video class="videoarea3" controls="controls" src="" autobuffer poster="/servicioandaluzdesalud/sites/default/files/2020-03/poster_nuevo.png"></video><div class="video-descriptions"></div></div></div>').once().insertBefore('.playlist3');
+
+        // por cada elemento de la lista uso el titulo y la url
+        $('ul.playlist3 li').each(function () {
+
+          var url_video = $(this).find('.video-url').attr('href');
+          var title_video = $(this).find('.video-url').text();
+          var descr_video = $(this).find('.video-descr').prop('outerHTML');
+
+          if (descr_video == null) {
+            descr_video = '<p class="video-descr">&nbsp;</p>';
+          }
+
+          $('<li data-urlvideo="' + url_video + '">' + title_video + '</li>').appendTo('.video-lista ul');
+          $('<div>' + descr_video + '</div>').appendTo('.playlist3-wrapper .video-descriptions').hide();
+        });
+
+        // al clic en elem. lista añado el video
+        $('.video-lista ul li').on('click', function () {
+          var index_elem = $(this).index();
+          $('.video-lista ul li').removeClass('activo');
+          $(this).addClass('activo');
+          $('.playlist3-wrapper .video-descriptions div').fadeOut();
+          $('.playlist3-wrapper .video-descriptions div:eq(' + index_elem + ')').fadeIn();
+          $('.video-video .videoarea3').attr({
+            'src': $(this).attr('data-urlvideo'),
+            'autoplay': 'autoplay'
+          })
+        });
+      }
+    }
+  };
+
+  /*Modify buttons cookies  */
+  Drupal.behaviors.aceptacion_cookie = {
+    attach: function (context, settings) {
+      $(document).ready(function () {
+
+        jQuery("button.eu-cookie-compliance-secondary-button").on('click', function () {
+          var div = jQuery('<div id="cookieDiv">');
+          jQuery("body").append(div);
+          jQuery('#sliding-popup').css('display', 'none');
+          var sliding = jQuery('#sliding-popup');
+          jQuery("#cookieDiv").append(sliding);
+          jQuery("#cookieDiv").css('display', 'none');
+        });
+
+        //Leemos las cookies
+        function readCookie(name) {
+          var nameEQ = name + "=";
+          var ca = document.cookie.split(';');
+
+          for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) {
+              return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+          }
+          return null;
+        }
+        // Leemos la cookie específica
+        var miCookie = readCookie("cookie-agreed");
+
+        if (jQuery("#okey_cookies").length && (miCookie == 0)) {
+          document.getElementById('confirmar_cookies').style = 'display:block';
+          document.getElementById('den_cookies').style = 'display:none';
+        }
+        if (jQuery("#okey_cookies").length && (miCookie == null)) {
+          document.getElementById('confirmar_cookies').style = 'display:none';
+          document.getElementById('den_cookies').style = 'display:none';
+        }
+
+        if (miCookie == 2 && jQuery("#den_cookies").length) {
+          document.getElementById('okey_cookies').style = 'display:block';
+          document.getElementById('confirmar_cookies').style = 'display:none';
+          document.getElementById('den_cookies').style = 'display:block';
+        }
+      })
+
+      if (drupalSettings.eu_cookie_compliance !== undefined) {
+        var date = new Date();
+        var lifetime = parseInt(drupalSettings.eu_cookie_compliance.cookie_lifetime);
+        date.setDate(date.getDate() + lifetime);
+        var cookieName = "cookie-agreed";
+        var path = drupalSettings.path.baseUrl;
+        if (path.length > 1) {
+          var pathEnd = path.length - 1;
+          if (path.lastIndexOf('/') === pathEnd) {
+            path = path.substring(0, pathEnd);
+          }
+        }
+        jQuery("#cookies_aceptar").once().on('click', function () {
+          Cookies.set(cookieName, 2, {
+            expires: date,
+            path: path
+          });
+          document.getElementById('okey_cookies').style = 'display:block';
+          document.getElementById('den_cookies').style = 'display:block';
+          document.getElementById('confirmar_cookies').style = 'display:none';
+          if (jQuery("#sliding-popup").length) {
+            document.getElementById('sliding-popup').style = 'display:none';
+          }
+        });
+        jQuery("#cookies_rechazo").once().on('click', function () {
+          Cookies.set(cookieName, 0, {
+            expires: date,
+            path: path
+          });
+          document.getElementById('den_cookies').style = 'display:none';
+          document.getElementById('confirmar_cookies').style = 'display:block';
+        });
+      }
+    }
+  }
+
+  //contador de visitas
+
+  $(document).ready(function () {
+    if (!$('#block-sastweakblock').length) {
+      if (0
+        || window.location.pathname == '/servicioandaluzdesalud/el-sas/fondos-europeos'
+        || window.location.pathname == '/servicioandaluzdesalud/el-sas/fondos-europeos/fondo-europeo-de-desarrollo-regional'
+        || window.location.pathname == '/servicioandaluzdesalud/el-sas/fondos-europeos/fondo-social-europeo') {
+        let html = '<div class="region region-pre-bottom"><div id="block-sastweakblock" class="contextual-region block block-sas-tweak block-sas-tweak-block" data-nosnippet=""><div class="content"><p style="font-size: 14px; text-align: right;">Número de visitas:<span id="numberVisits"> </span></p></div></div></div>';
+        $('#pre-bottom').append(html);
+      }
+    }
+    if ($('#block-sastweakblock').length) {
+      var url = window.location.pathname;
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          var nvis = this.responseText.split(";");
+          if (nvis[1] == -1) {
+            $('#numberVisits').closest("#block-sastweakblock").html('');
+          }
+          else {
+            $('#numberVisits').text(" " + nvis[1])
+          }
+        }
+      };
+      xhttp.open("GET", "/servicioandaluzdesalud/api/contador-visitas?sec=" + url, true);
+      xhttp.send();
+    }
+  });
+
+
+  //fin contador de visitas
+
+  //Ordenación de tablas
+  Drupal.behaviors.sort_table = {
+    attach: function (context, settings) {
+      $(".tablesorter").once().tablesorter();
+      //seleccionando tabla que contiene clase tablesorter
+      var alltables = document.getElementsByTagName('table');
+      var tablesel = [];
+      for (let i = 0; i < alltables.length; i++) {
+        if (alltables[i].innerHTML.indexOf("tablesorter") != -1) {
+          tablesel[i] = alltables[i];
+        }
+      }
+      for (let i = 0; i < tablesel.length; i++) {
+        let thsel = [];
+        thsel = tablesel[i].getElementsByTagName('th');
+        for (let j = 0; j < thsel.length; j++) {
+          var spanarrow = document.createElement("span");
+          spanarrow.classList.add('spanarrow');
+          spanarrow.classList.add('icono-arrowtable-stay');
+
+          // Antes de hacer el appenchild verificar si en thsel de j tenemos algún span con esa clase,
+          // en tal caso no meterlo.
+          // Ocultamos las flechas de las columnas que no ordenan
+          if (thsel[j].getElementsByClassName('spanarrow').length == 0 && !thsel[j].classList.contains('tablesorter-noSort')) {
+            thsel[j].appendChild(spanarrow);
+          }
+
+          $(thsel[j]).once().click(function () {
+            // Si no tiene ninguna de las dos clases o si la clase que tiene es down
+            if (thsel[j].getElementsByClassName('icono-arrowtable-up').length == 0 &&
+              thsel[j].getElementsByClassName('icono-arrowtable-down').length == 0) {
+              for (let k = 0; k < thsel.length; k++) {
+                if (thsel[k].getElementsByTagName('span').length != 0) {
+                  thsel[k].getElementsByTagName('span')[0].classList.add('icono-arrowtable-stay');
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-up');
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-down');
+                }
+              }
+              if (thsel[j].getElementsByTagName('span').length != 0) {
+                thsel[j].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-stay');
+                thsel[j].getElementsByTagName('span')[0].classList.add('icono-arrowtable-up');
+              }
+            } else if (thsel[j].getElementsByClassName('icono-arrowtable-down').length != 0) {
+              for (let k = 0; k < thsel.length; k++) {
+                if (thsel[k].getElementsByTagName('span').length != 0) {
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-up');
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-down');
+                }
+              }
+              thsel[j].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-stay');
+              thsel[j].getElementsByTagName('span')[0].classList.add('icono-arrowtable-up');
+              thsel[j].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-down');
+            } else if (thsel[j].getElementsByClassName('icono-arrowtable-up').length != 0 &&
+              thsel[j].getElementsByClassName('icono-arrowtable-down').length == 0) {
+              for (let k = 0; k < thsel.length; k++) {
+                if (thsel[k].getElementsByTagName('span').length != 0) {
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-up');
+                  thsel[k].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-down');
+                }
+              }
+              thsel[j].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-stay');
+              thsel[j].getElementsByTagName('span')[0].classList.add('icono-arrowtable-down');
+              thsel[j].getElementsByTagName('span')[0].classList.remove('icono-arrowtable-up');
+            }
+
+          });
+        }
+      }
+
+    }
+
+  }
+
+  //Formularios puntos de vacunación sin cita e infantil
+  Drupal.behaviors.puntosvac = {
+    attach: function (context, settings) {
+      // Selector de los formularios a procesar
+      const forms = [
+        '#views-exposed-form-puntos-de-vacunacion-sin-cita-block-1',
+        '#views-exposed-form-puntos-de-vacunacion-sin-cita-infantil-block-1'
+      ];
+
+      forms.forEach(function (formId) {
+        $(once('enable-disable-submit-tid-depth', formId, context)).each(function () {
+          // Ocultar y mostrar botón de "clear"
+          var clearVacButton = document.querySelector(`${formId} .clear-vac`);
+          var hasSearchParams = window.location.search.length > 0;
+          if (clearVacButton) {
+            clearVacButton.style.display = hasSearchParams ? 'inline-block' : 'none';
+          }
+
+          setTimeout(function () {
+            puntosvacEnableDisableSubmit(formId);
+            $(`${formId} #edit-term-node-tid-depth--level-0`).change(function () {
+              puntosvacEnableDisableSubmit(formId);
+            });
+          }, 500);
+        });
+      });
+
+      function puntosvacEnableDisableSubmit(formId) {
+        var item = $(`${formId} #edit-term-node-tid-depth--level-0`);
+        const $submitButton = formId === '#views-exposed-form-puntos-de-vacunacion-sin-cita-infantil-block-1'
+          ? $(`${formId} #edit-submit-puntos-de-vacunacion-sin-cita-infantil`)
+          : $(`${formId} #edit-submit-puntos-de-vacunacion-sin-cita`);
+
+        if ($(item).val() != 'All') {
+          $submitButton.removeClass('item-disabled').addClass('item-no-disabled');
+          $submitButton.removeAttr('disabled');
+        } else {
+          $submitButton.addClass('item-disabled').removeClass('item-no-disabled');
+          $submitButton.attr('disabled', 'disabled');
+        }
+      }
+    }
+  };
+
+  //Para el enlace de ayuda de cartera de servicios
+  Drupal.behaviors.cartera_servicios_ayuda = {
+    attach: function (context, settings) {
+      $(context).find('.enlace-ayuda').once('mostrar-ocultar-div').on('click', function (event) {
+        event.preventDefault();
+
+        var $boxInfoAyuda = $('.box-info-ayuda');
+        var $enlaceAyuda = $('.enlace-ayuda');
+
+        $boxInfoAyuda.toggleClass('view-header-show');
+        $enlaceAyuda.toggleClass('enlace-ayuda-show');
+      });
+    }
+  };
+
+  //Para mostrar el bloque de nota solo en las páginas necesarias de Cartera de Servicios
+  /*Drupal.behaviors.mostrarBloquesNota = {
+  attach: function (context, settings) {
+    const allowedPaths = [
+      '/profesionales/cartera-de-servicios/carteraservicioshospitalaria/resumen',
+      '/profesionales/cartera-de-servicios/atencion-hospitalaria/carteras',
+      '/profesionales/cartera-de-servicios/carteraservicioshospitalaria/resumen/',
+      '/profesionales/cartera-de-servicios/atencion-hospitalaria/carteras/'
+    ];
+
+    const currentPath = window.location.pathname;
+    const isVisible = allowedPaths.includes(currentPath);
+
+    const bloques = [
+      '#block-leyendacarteradeservicios'
+    ];
+
+    bloques.forEach((selector) => {
+      const bloque = once('mostrarBloquesNota', selector, context).shift();
+      if (bloque) {
+        bloque.style.display = isVisible ? '' : 'none';
+      }
+    });
+  }
+};*/
+
+  //Para la búsqueda avanzada de cartera de servicios según tenga o no selección el campo select
+  Drupal.behaviors.customSearchBehavior = {
+    attach: function (context, settings) {
+      // Definir las clases de las páginas donde se aplicará el script
+      var formPages = [
+        'view-carteras-page-1',
+        'view-cartera-de-servicios-de-atencion-hospitalaria-page-1',
+        'sas-cartera-tabla-cartera-hospitalaria'
+      ];
+
+      // Verificar si la página actual es una de las que debe aplicar el script
+      var bodyClasses = $('body').attr('class');
+      var isFormPage = formPages.some(function (pageClass) {
+        return bodyClasses.includes(pageClass);
+      });
+
+      if (isFormPage) {
+        // Seleccionar el bloque de búsqueda avanzada
+        var advancedSearchDetails = $('#edit-secondary', context);
+
+        // Seleccionar el elemento del select
+        var selectElement = $('#edit-tid', context);
+
+        // Obtener la URL actual
+        var currentUrl = window.location.href;
+
+        // Verificar si la URL contiene parámetros de búsqueda y si termina en 'All'
+        var hasSearchParams = currentUrl.indexOf('?combine=') !== -1;
+        var endsWithAll = currentUrl.endsWith('tid=All');
+
+        // Verificar si el select tiene un valor seleccionado diferente a "All"
+        var selectedValue = selectElement.val();
+        var isValueSelected = selectedValue && selectedValue !== 'All';
+
+        // Plegar o desplegar el formulario según el estado de la URL o el select
+        if (advancedSearchDetails.length) {
+          if (endsWithAll) {
+            advancedSearchDetails.removeAttr('open');
+          } else if (hasSearchParams || isValueSelected) {
+            advancedSearchDetails.attr('open', 'open');
+          } else {
+            advancedSearchDetails.removeAttr('open');
+          }
+
+          // Añadir un evento para manejar cambios dinámicos en el select
+          selectElement.once('customSearchBehavior').change(function () {
+            var selectedValue = $(this).val();
+            var isValueSelected = selectedValue && selectedValue !== 'All';
+
+            if (isValueSelected || hasSearchParams) {
+              advancedSearchDetails.attr('open', 'open');
+            } else {
+              advancedSearchDetails.removeAttr('open');
+            }
+          });
+        }
+      }
+    }
+  };
+
+  //Formularios puntos de vacunación sin cita e infantil
+  Drupal.behaviors.puntosvac = {
+    attach: function (context, settings) {
+      // Selector de los formularios a procesar
+      const forms = [
+        '#views-exposed-form-puntos-de-vacunacion-sin-cita-block-1',
+        '#views-exposed-form-puntos-de-vacunacion-sin-cita-infantil-block-1'
+      ];
+
+      forms.forEach(function (formId) {
+        $(once('enable-disable-submit-tid-depth', formId, context)).each(function () {
+          // Ocultar y mostrar botón de "clear"
+          var clearVacButton = document.querySelector(`${formId} .clear-vac`);
+          var hasSearchParams = window.location.search.length > 0;
+          if (clearVacButton) {
+            clearVacButton.style.display = hasSearchParams ? 'inline-block' : 'none';
+          }
+
+          setTimeout(function () {
+            puntosvacEnableDisableSubmit(formId);
+            $(`${formId} #edit-term-node-tid-depth--level-0`).change(function () {
+              puntosvacEnableDisableSubmit(formId);
+            });
+          }, 500);
+        });
+      });
+
+      function puntosvacEnableDisableSubmit(formId) {
+        var item = $(`${formId} #edit-term-node-tid-depth--level-0`);
+        const $submitButton = formId === '#views-exposed-form-puntos-de-vacunacion-sin-cita-infantil-block-1'
+          ? $(`${formId} #edit-submit-puntos-de-vacunacion-sin-cita-infantil`)
+          : $(`${formId} #edit-submit-puntos-de-vacunacion-sin-cita`);
+
+        if ($(item).val() != 'All') {
+          $submitButton.removeClass('item-disabled').addClass('item-no-disabled');
+          $submitButton.removeAttr('disabled');
+        } else {
+          $submitButton.addClass('item-disabled').removeClass('item-no-disabled');
+          $submitButton.attr('disabled', 'disabled');
+        }
+      }
+    }
+  };
+
+  /*Funcionalidad para que cuando en cartera de servicios se pulse en el
+   enlace de ayuda el scroll se desplace hacia la ayuda */
+  Drupal.behaviors.enlaceAyuda = {
+    attach: function (context, settings) {
+      // Asegúrate de que el comportamiento se ejecute una sola vez
+      $('.enlace-ayuda', context).once('addDownloadButton').click(function (event) {
+        event.preventDefault(); // Previene el comportamiento por defecto del enlace
+        $('html, body').animate({
+          scrollTop: $('#ayuda-title').offset().top
+        }, 900);
+      });
+    }
+  };
+
+})(jQuery, Drupal, drupalSettings);
+
+// START covid19 scripts
+
+function show_hide(id) {
+  var element = document.getElementById(id);
+  if (element.classList.contains('block')) {
+    element.classList.remove('block');
+    element.classList.add('hidden');
+  } else {
+    element.classList.remove('hidden');
+    element.classList.add('block');
+  }
+
+
+}
+
+function hide_all(id) {
+  var element = document.getElementById(id);
+  element.classList.remove('block');
+  element.classList.add('hidden');
+}
+
+function show_hide_page_content(from_id, to_id) {
+  var from = document.getElementById(from_id);
+  var to = document.getElementById(to_id);
+  autoTestScrollTo(jQuery('.test-covid19-page'));
+
+  // if (from.classList.contains('block')) {
+  from.classList.remove('block');
+  from.classList.add('hidden');
+
+  to.classList.remove('hidden');
+  to.classList.add('block');
+  // } else {
+  //     to.classList.remove('block');
+  //     to.classList.add('hidden');
+  //
+  //     from.classList.remove('hidden');
+  //     from.classList.add('block');
+  // }
+
+}
+
+function autoTestScrollTo(element) {
+  jQuery('html, body').animate({
+    'scrollTop': element.offset().top - 150
+  }, 'slow', 'swing');
+}
+
+// END covid19 scripts
+
+var carteraUrl = window.location.pathname;
+var carteraSplit = carteraUrl.split('/');
+if (carteraSplit[4] === 'atencion-primaria') {
+  //console.log('ci sono');
+  jQuery('.layout-sidebar-first .csap-title').once().prepend('<button id="sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button><button id="hider-sas-hamburger" class="hamburger hamburger--squeeze" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></button>');
+}
+
+// buscador
+jQuery('.block-busqueda .bef-datepicker').datepicker({
+  dateFormat: 'dd-mm-yy',
+  changeMonth: true,
+  changeYear: true,
+  yearRange: '-1977:+0'
+});
+
+/* prorroga de contratos */
+if (jQuery('body').hasClass('node-61718')) {
+  var lista = jQuery('.view-content .view-grouping-content .item-list:first ul');
+  var listaElem = lista.children('li');
+  listaElem.sort(function (a, b) {
+    var A = jQuery(a).text().toUpperCase();
+    var B = jQuery(b).text().toUpperCase();
+    return (A < B) ? -1 : (A > B) ? 1 : 0;
+  });
+  jQuery.each(listaElem, function (id, elemento) {
+    listaElem.append(elemento);
+  });
+};
+
+jQuery("form#views-exposed-form-buscador-page-5").submit(function () {
+  var ttoken = Date.now();
+
+  if (jQuery("input#ttoken").length == 0) {
+    var input = document.createElement("input");
+    input.id = "ttoken";
+    input.type = "hidden";
+    input.name = "ttoken";
+    input.value = ttoken;
+    jQuery(this).append(input);
+  }
+});
+
+
+
+//Pone aÃ±o al calendario
+jQuery(".calendariolaboral2020").attr('data-y', '2020');
+//construye el calendario
+jQuery(".calendariolaboral2020").each(function () {
+  jscalendario(this)
+});
+//Marca los dias en el calendario
+jQuery('.vista-sasfestivos [data-fecha][data-tipo="LOC"]').each(function () {
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('data-tipo', jQuery(this).attr('data-tipo').trim());
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('title', jQuery(this).text())
+  //jQuery(this).text();
+});
+jQuery('.vista-sasfestivos [data-fecha][data-tipo="NAC"]').each(function () {
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('data-tipo', jQuery(this).attr('data-tipo').trim());
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('title', jQuery(this).text())
+  //jQuery(this).text();
+})
+jQuery('.vista-sasfestivos [data-fecha][data-tipo="AUT"]').each(function () {
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('data-tipo', jQuery(this).attr('data-tipo').trim());
+  jQuery('.vista-sasfestivos .inmonth[data-esfecha="' + jQuery(this).attr('data-fecha').trim() + '"]').attr('title', jQuery(this).text())
+  //jQuery(this).text();
+});
+
+//Calendario laboral
+
+if (jQuery('.calendariolaboral').length) {
+  jQuery('.ue-logo').appendTo('.block-views-blocklogo-encabezado-block-2');
+  jQuery('.logo-eatencion').appendTo('.block-views-blocklogo-encabezado-block-2');
+  jQuery('.eatencion-mobile').appendTo('.block-views-blocklogo-encabezado-block-2');
+}
+
+/* fichero export.js que no se puso en la pl del catalogo centros */
+(function (w) {
+
+  //Helper class in order to define formats
+  function Format(name, type) {
+    this.name = name;
+    this.mimeType = type;
+  }
+
+  ///// CONSTANTS
+  const __formats = {
+    'xls': new Format('Excel', 'data:application/vnd.ms-excel;base64'),
+    'csv': new Format('CSV', 'data:text/plain'),
+    'doc': new Format('Word', 'data:application/vnd.ms-word'),
+    'html': new Format('HTML', 'data:text/html')
+  };
+
+  const __excelTemplate = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheetName}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>{table}</body></html>'; //The template to better export to Excel
+  const __encodingMeta = '<meta charset="UTF-8">'; //The encoding to be able to work with non-english characters correctly
+  ///// END CONSTANTS
+
+  //// HELPER FUNCTIONS
+  /**
+   * Get the suitable format from the file extension
+   * @param {string} fileName
+   */
+  var __getFormatFromFileExt = function (fileName) {
+    var posDot = fileName.lastIndexOf('.');
+    if (posDot <= 0)
+      throw new Error('The file must have an extension');
+
+    var ext = fileName.substring(posDot + 1).toLowerCase();
+    var formatInfo = __formats[ext]; //Get the format info from the proprties fo the format object
+    if (!formatInfo)
+      throw new Error('Unsupported format!!');
+    else
+      return formatInfo;
+  };
+
+  /**
+   * Converto to base64
+   * @param {string} str
+   */
+  var __base64 = function (str) {
+    return w.btoa(unescape(encodeURIComponent(str)))
+  };
+
+  /**
+   * Replaces fields in the form {fieldName} in a template
+   * @param {*} str The tempplate where field must be replaced
+   * @param {*} fieldName The name of the field to be replaced (without the brackets)
+   * @param {*} value The value to use as a replacement
+   */
+  var __replaceFields = function (template, fieldName, fieldValue) {
+    return template.replace('{' + fieldName + '}', fieldValue);
+  };
+
+  /**
+   * Converts a table element into a list using the specified separator, one row per line.
+   * @param {DOMElement} eltTable
+   * @param {string} separator
+   */
+  var __table2List = function (eltTable, separator) {
+    if (!(eltTable && eltTable.tagName == 'TABLE')) //If it's not a table...
+      throw new Error('Only tables can be converted to this format!!');
+
+    //Hold the results in an array to optimize the process a little bit (instead of just using strings, althoug it could be obviously enhanced, it's not bad for a quick approach)
+    var res = new Array(eltTable.rows.length);
+    //loop through rows and cells to create each line
+    for (var r = 0; r < eltTable.rows.length; r++) {
+      var cells = eltTable.rows[r].cells;
+      var line = new Array(cells.length);
+      for (var c = 0; c < cells.length; c++) {
+        line[c] = cells[c].innerText;
+      }
+      res[r] = line.join(separator);
+    }
+    return res.join('\n');
+  }
+  //// END HELPER FUNCTIONS
+
+  //// MAIN FUNCTION
+  /**
+   * Exports the table to the format specified by the filename
+  var _export = function(DOMElmt, fileName, dataName) {
+   * @param {element} objTable The DOM element to export (generally a table)
+   * @param {string} fileName The name of the file to export the table to
+   * @param {string} dataName Optional, the name of the worksheet when exporting to XLS
+   */
+  var _export = function (DOMElmt, fileName, dataName) {
+    //Get the file format info from the file extension
+    var format = __getFormatFromFileExt(fileName);
+
+    //Get the info from the element
+    var html = DOMElmt.outerHTML;
+
+    //Generate file
+    var rawData = ''; //For IE
+    var resData = format.mimeType + ',';
+    switch (format.name) {
+      case 'Excel':
+        dataName = dataName || 'ExportedData'; //Default name for the worksheet
+        rawData = __replaceFields(__excelTemplate, 'table', html); //The table data
+        rawData = __replaceFields(rawData, 'worksheetName', dataName); //The name of the Excel worksheet
+        //resData += __base64(__encodingMeta + rawData);
+        resData += __base64(rawData);
+        break;
+      case 'CSV':
+        rawData = __table2List(DOMElmt);
+        resData += '\ufeff' + encodeURIComponent(rawData); //Adding the UTF-8 BOM to force Excel to interpret the data in UTF-8, so that non-English characters are correctly displayed
+        break;
+      case 'Word':
+        rawData = html;
+        resData += encodeURIComponent(__encodingMeta + html);
+        break;
+      case 'HTML':
+        rawData = html;
+        resData += __encodingMeta + html;
+        break;
+    }
+
+    if (navigator.userAgent.indexOf('MSIE ') > 0 || navigator.userAgent.indexOf('Trident/') > 0) // If Internet Explorer
+    {
+      //We need to append an iframe and write directly in it :-S Encodings don't work either: just the plain content.
+      var ifr = w.document.createElement('iframe');
+      ifr.style.display = 'none';
+      w.document.body.appendChild(ifr);
+      ifr.contentWindow.document.open("txt/html", "replace");
+      ifr.contentWindow.document.write(rawData);
+      ifr.contentWindow.document.close();
+      ifr.focus();
+      ifr.contentWindow.document.execCommand("SaveAs", true, fileName);
+      w.document.body.removeChild(ifr);
+    } else { //Rest of the browsers (except MS Edge: no way to have it working there)
+      //Create a link, not in the DOM, to get the resulting document
+      var link = w.document.createElement('a');
+      link.download = fileName;
+      link.href = resData;
+      //In firefox only links attached to the DOM will work so we need to attach it first
+      link.style.display = 'none';
+      w.document.body.appendChild(link);
+      link.click(); //Simulation of a click on a real link
+      w.document.body.removeChild(link);
+    }
+  };
+  ////END MAIN FUNCTION
+
+
+
+  //Export the funcionality through a global object
+  if (!w.Exporter) {
+    w.Exporter = {
+      'export': _export
+    };
+  }
+})(window);
+
+//Arreglo Plantilla Media Centros Sanitarios
+
+// // Espera a que el DOM esté completamente cargado
+// document.addEventListener("DOMContentLoaded", function () {
+//   // Verifica si el elemento raíz de la vista actual tiene las clases adecuadas
+//   var vistaActual = document.querySelector(".view-plantilla-de-centros-sanitarios.view-plantilla-centros-sanitarios-unica");
+
+//   // Si no se encuentra la vista, no se ejecuta el código
+//   if (!vistaActual) {
+//     return;
+//   }
+
+//   // Encuentra todos los elementos select con la clase "simpler-select"
+//   var selectElements = document.querySelectorAll(".simpler-select");
+
+//   // Encuentra el botón de "Consultar"
+//   var botonConsulta = document.getElementById("edit-submit-plantilla-centros-sanitarios-unica");
+
+//   // Encuentra el primer elemento select con la clase "simpler-select"
+//   var primerSelect = document.querySelector(".simpler-select");
+
+//   var valorSeleccionado = primerSelect.getAttribute("data-parent-value");
+
+//   // Encuentra el elemento select con la clase "simpler-select"
+//   var selectElement = document.querySelector(".simpler-select");
+
+//   // Encuentra la opción con el atributo data-parent-value igual a "All"
+//   var optionAll = selectElement.querySelector('option[data-parent-value="All"]');
+
+//   // Establece la opción "All" como disabled
+//   console.log(optionAll);
+//   optionAll.disabled = true;
+
+//   // Función para verificar si todos los selectores tienen un valor diferente de "All" excepto el primero
+//   function verificarSeleccion() {
+//     var primerFiltro = selectElements[0].value;
+
+//     // Itera a través de todos los selectores excepto el primero
+//     for (var i = 1; i < selectElements.length; i++) {
+//       if (selectElements[i].value === "All" && primerFiltro !== "All") {
+//         // Permitir "All" en el segundo filtro si el primer filtro no es "All"
+//         if (valorSeleccionado === "All") {
+//           // Si el primer filtro es "All", deshabilita el botón
+//           botonConsulta.disabled = true;
+//           botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+//         } else {
+//           // Habilita el botón si el primer selector tiene un valor diferente de "All"
+//           botonConsulta.disabled = false;
+//           botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+//         }
+//         continue;
+//       } else if (selectElements[i].value === "All") {
+//         // Si el primer filtro es "All", deshabilita el botón
+//         botonConsulta.disabled = true;
+//         selectElements.removeChild(option);
+//         botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+//         if (valorSeleccionado === "All") {
+//           // Si el primer filtro es "All", deshabilita el botón
+//           botonConsulta.disabled = true;
+//           botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+//         } else {
+//           // Habilita el botón si el primer selector tiene un valor diferente de "All"
+//           botonConsulta.disabled = false;
+//           botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+//         }
+//         return;
+//       }
+//     }
+
+//     // Habilita el botón si todos los selectores tienen un valor diferente de "All"
+//     botonConsulta.disabled = false;
+//     botonConsulta.classList.remove("boton-deshabilitado-plantilla-media");
+//   }
+
+//   // Agrega un evento 'change' a cada elemento select
+//   selectElements.forEach(function (selectElement) {
+//     selectElement.addEventListener("change", verificarSeleccion);
+//   });
+
+//   // Inicialmente, deshabilita el botón
+//   botonConsulta.disabled = true;
+//   botonConsulta.classList.add("boton-deshabilitado-plantilla-media");
+
+
+// });
+/*Ocultar segundo mapa listas de espera*/
+if (jQuery('.view-dr-listas-espera.lista-espera').length) {
+  jQuery('.view-dr-listas-espera.lista-espera .view-header .mapa-andalucia').last().hide();
+  jQuery('.view-dr-listas-espera.lista-espera .view-header .item-list').last().hide();
+}
+
+// Jerarquia calendario laboral
+(function ($, Drupal, window, document, undefined) {
+
+  // Utilizamos una bandera para asegurarnos de que el código se ejecute solo una vez.
+  var codigoEjecutado = false;
+
+  // Utilizamos Drupal.behaviors para encapsular nuestro código jQuery.
+  Drupal.behaviors.customBehavior = {
+    attach: function (context, settings) {
+      // Verificamos si el código ya se ha ejecutado previamente.
+      if (!codigoEjecutado) {
+        // Utilizamos el selector para encontrar el elemento deseado y manipularlo.
+        $('#block-sas2018-content > div > div > div > div.view-footer > div:nth-child(6) > div:nth-child(1) > h3', context).once('customBehavior').each(function () {
+          // Creamos un nuevo elemento <div> y <h2>.
+          var nuevoDiv = $('<div>');
+          var nuevoH2 = $('<h2>'); // Creamos el h2 sin texto por ahora
+          var nuevoSpan = $('<span>').text('Festivos'); // Creamos el span con el texto "Festivos"
+
+          // Envuelve el h3 con el nuevo div.
+          $(this).wrap(nuevoDiv);
+
+          // Envuelve el h3 (ahora dentro del div) con el nuevo h2.
+          $(this).wrap(nuevoH2);
+
+          // Añadimos el span al h2
+          nuevoH2.append(nuevoSpan);
+        });
+
+        // Marcamos la bandera como true para indicar que el código ya se ha ejecutado.
+        codigoEjecutado = true;
+      }
+    }
+  };
+
+
+  // Oculta el bloque de la información de cartera de servicios en URL con parámetros de búsqueda
+  document.addEventListener('DOMContentLoaded', function () {
+    if (
+      document.body.classList.contains('view-cartera-de-servicios-de-atencion-hospitalaria-page-1') ||
+      document.body.classList.contains('view-detalle-centro-page-1')
+    ) {
+      function hideBlock() {
+        const blockSabiasQue = document.querySelector('#block-sabiasquecarteradeservicios');
+        const blockTitulo = document.querySelector('#block-titulocarteradeservicios');
+        const blockContenedor = document.querySelector('#block-contenedorinformacioncarteradeservicios');
+        const blockleyenda = document.querySelector('.sup-leyenda');
+        const divtextleyenda = document.querySelector('.content-text-nota');
+
+        const url = window.location.href;
+        const tieneParametros = url.includes('?');
+
+        if (tieneParametros) {
+          document.body.classList.remove('mostrar-bloques-cartera');
+          if (divtextleyenda && blockleyenda) {
+            blockleyenda.style.display = 'block';
+          }
+        } else {
+          document.body.classList.add('mostrar-bloques-cartera');
+          if (blockleyenda) blockleyenda.style.display = 'none';
+          if (blockSabiasQue) blockSabiasQue.style.display = 'block'
+          if (blockTitulo) blockTitulo.style.display = 'block'
+          if (blockContenedor) blockContenedor.style.display = 'block'
+        }
+      }
+
+      hideBlock();
+
+      window.addEventListener('popstate', function () {
+        hideBlock();
+      });
+    }
+  });
+
+
+
+  // Funcionalidad del botón Volver del detalle de cartera de servicios
+  /*document.addEventListener('DOMContentLoaded', function () {
+    // Verificar si el body tiene alguna de las dos clases indicadas
+    if (
+      document.body.classList.contains('view-cartera-de-servicios-de-atencion-hospitalaria-page-1') ||
+      document.body.classList.contains('sas-cartera-tabla-cartera-hospitalaria')
+    ) {
+      // Crear el botón
+      var button = document.createElement('button');
+      button.className = 'volver-button';     // Asignar una clase para estilos
+      button.textContent = 'Volver';          // Texto del botón
+
+      // Seleccionar todos los elementos .view-grouping
+      var groupings = document.querySelectorAll('.view-grouping');
+
+      if (groupings.length > 0) {
+        // Tomar el último .view-grouping
+        var lastGrouping = groupings[groupings.length - 1];
+
+        // Insertar el botón justo después de ese elemento
+        lastGrouping.insertAdjacentElement('afterend', button);
+
+        // Evento de clic para volver atrás
+        button.addEventListener('click', function () {
+          window.history.back();
+        });
+      }
+    }
+  });*/
+  // //CARTERA LEYENDA
+  // // Obtener el contenido de ambos divs
+  // const contentViewGrouping = document.querySelector('.view-grouping-content') ? document.querySelector('.view-grouping-content').innerText : '';
+  // const contentBlockSas2018 = document.querySelector('#block-sas2018-content') ? document.querySelector('#block-sas2018-content').innerText : '';
+
+  // // Mapear los símbolos que corresponden a cada sección
+  // const mapping = {
+  //   'text-nota-uno-uno': ['[PC]'],
+  //   'text-nota-uno-dos': ['[PCE]'],
+  //   'text-nota-uno-tres': ['[P*]'],
+  //   'text-nota-dos-uno': ['*'],
+  //   'text-nota-dos-dos': ['**'],
+  //   'text-nota-dos-tres': ['***'],
+  //   'text-nota-tres-uno': ['^'],
+  //   'text-nota-tres-dos': ['^^'],
+  //   'text-nota-cuatro': ['#'],
+  //   'text-nota-cinco-uno': ['(1)'],
+  //   'text-nota-cinco-dos': ['(2)'],
+  //   'text-nota-cinco-tres': ['(3)'],
+  //   'text-nota-uno': ['[PC]', '[PCE]', '[P*]'],
+  //   'text-nota-dos': ['* ', '**', '***'],
+  //   'text-nota-tres': ['^', '^^'],
+  //   'text-nota-cinco': ['(1)', '(2)', '(3)']
+  // };
+
+  // // Variable para verificar si algún div queda visible
+  // let isAnyDivVisible = false;
+
+  // // Función para comprobar si algún símbolo está presente en el contenido
+  // function checkSymbolsInContent(symbols, content) {
+  //   let found = false;
+  //   symbols.forEach(symbol => {
+  //     if (content.includes(symbol)) {
+  //       found = true;
+  //     }
+  //   });
+  //   return found;
+  // }
+
+  // // Iterar sobre cada clase de text-nota y verificar si alguno de los símbolos aparece en los contenidos
+  // Object.keys(mapping).forEach(key => {
+  //   const div = document.querySelector(`.${key}`);
+  //   const symbols = mapping[key];
+
+  //   // Verificar si los símbolos están presentes en alguno de los dos contenidos
+  //   let foundInViewGrouping = checkSymbolsInContent(symbols, contentViewGrouping);
+  //   let foundInBlockSas = checkSymbolsInContent(symbols, contentBlockSas2018);
+
+  //   if (!foundInViewGrouping && !foundInBlockSas && div) {
+  //     // Si no se encuentran símbolos, ocultar el div
+  //     div.style.display = 'none';
+  //   } else if (foundInViewGrouping || foundInBlockSas) {
+  //     // Si se encuentran símbolos, marcar que hay al menos un div visible
+  //     isAnyDivVisible = true;
+  //   }
+  // });
+
+})(jQuery, Drupal, this, this.document);
+
+// JS Para Precios Públicos
+document.addEventListener('DOMContentLoaded', function () {
+  const specificUrl = '/servicioandaluzdesalud/profesionales/relacion-con-la-ciudadania/precios-publicos';
+
+  if (window.location.pathname.startsWith(specificUrl)) {
+    const targetNode = document.body;
+    const config = { childList: true, subtree: true };
+
+    const adjustColumnWidths = () => {
+      const tables = document.querySelectorAll('table.views-table');
+
+      tables.forEach(table => {
+        const priceCells = table.querySelectorAll('.views-field-sas-preciopublico-precio');
+        let maxLength = 0;
+
+        priceCells.forEach(cell => {
+          const text = cell.innerText.trim();
+          if (text.length > maxLength) {
+            maxLength = text.length;
+          }
+        });
+
+        const priceHeader = table.querySelector('th.views-field-sas-preciopublico-precio');
+        if (priceHeader) {
+          priceHeader.style.width = `${maxLength + 5}ch`;
+          priceHeader.style.textAlign = 'center'; // Alinear a la izquierda
+        }
+
+        priceCells.forEach(cell => {
+          cell.style.width = `${maxLength + 5}ch`;
+          cell.style.textAlign = 'center'; // Alinear a la izquierda
+        });
+      });
+    };
+
+    const callback = function (mutationsList, observer) {
+      // Comprobar y eliminar <p> duplicados dentro de <div class="view-grouping-header">
+      const groupingHeaders = document.querySelectorAll('.view-grouping-header');
+      const seenTexts = new Set();
+
+      groupingHeaders.forEach(header => {
+        const paragraphs = header.querySelectorAll('p');
+        paragraphs.forEach(paragraph => {
+          const text = paragraph.innerText.trim();
+          if (seenTexts.has(text)) {
+            paragraph.remove();
+          } else {
+            seenTexts.add(text);
+          }
+        });
+      });
+
+      // Comprobar y vaciar <caption> duplicados dentro de <div class="view-grouping-content">
+      const groupingContents = document.querySelectorAll('.view-grouping-content');
+      groupingContents.forEach(content => {
+        const caption = content.querySelector('caption');
+        if (caption) {
+          const captionText = caption.innerText.trim();
+          if (seenTexts.has(captionText)) {
+            caption.innerText = ''; // Vaciar el contenido del caption
+          }
+        }
+      });
+
+      // Ajustar el ancho de las columnas de precio
+      adjustColumnWidths();
+    };
+
+    const observer = new MutationObserver(callback);
+    observer.observe(targetNode, config);
+
+    // Initial call to handle already present elements
+    callback();
+  }
+});
+
+
+//Plantilla centros. Deshabilitar botón si no se selecciona filtro
+document.addEventListener("DOMContentLoaded", function () {
+  const selectElement = document.getElementById("edit-tid--level-0");
+  const submitButton = document.querySelector("input[type='submit'][id='edit-submit-plantilla-centros-sanitarios-unica']");
+
+  function toggleButton() {
+    if (submitButton) {
+      if (selectElement.value === "All") {
+        submitButton.disabled = true;
+        submitButton.classList.add("btn-plantilla-centros-dis"); // Agregar clase
+      } else {
+        submitButton.disabled = false;
+        submitButton.classList.remove("btn-plantilla-centros-dis"); // Eliminar clase
+      }
+    }
+  }
+
+  // Deshabilitar el botón por defecto si la opción inicial es "All"
+  toggleButton();
+
+  // Agregar evento para detectar cambios en el select
+  selectElement.addEventListener("change", toggleButton);
+});
+
+//copiar url al compartir - Versión universal
+document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("comparte-url")) {
+      e.preventDefault();
+
+      const compartirEnlace = e.target.closest('.compartir-enlace');
+      if (!compartirEnlace) return;
+
+      let mensaje = document.getElementById("mensaje-copiado");
+      if (!mensaje) {
+        mensaje = document.createElement("div");
+        mensaje.id = "mensaje-copiado";
+        mensaje.textContent = "Enlace copiado";
+        mensaje.style.cssText = "position: absolute; top: 100%; right: 0; margin-top: 15px; background: #087021; color: white; padding: 8px 12px; border-radius: 4px; display: none; z-index: 1000; font-size: 14px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);";
+        compartirEnlace.style.position = "relative";
+        compartirEnlace.appendChild(mensaje);
+      }
+
+      const baseUrl = "https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud";
+      let currentPath = window.location.pathname + window.location.search + window.location.hash;
+
+      if (currentPath.startsWith("/servicioandaluzdesalud")) {
+        currentPath = currentPath.substring("/servicioandaluzdesalud".length);
+      }
+
+      const url = baseUrl + currentPath;
+
+      // Intentar copiar con detección automática
+      copyTextToClipboard(url)
+        .then(() => {
+          mensaje.textContent = "Enlace copiado";
+          mensaje.style.background = "#087021";
+          mensaje.style.display = "block";
+          setTimeout(() => mensaje.style.display = "none", 2000);
+        })
+        .catch(err => {
+          console.error("Error copiando:", err);
+          mensaje.textContent = "Error al copiar";
+          mensaje.style.background = "#f44336";
+          mensaje.style.display = "block";
+          setTimeout(() => mensaje.style.display = "none", 2000);
+        });
+    }
+  });
+
+  // Función universal de copiado
+  async function copyTextToClipboard(text) {
+    // Método moderno (para HTTPS)
+    if (navigator.clipboard && window.isSecureContext) {
+      return await navigator.clipboard.writeText(text);
+    }
+    // Método legacy (para HTTP o navegadores antiguos)
+    else {
+      return new Promise((resolve, reject) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.cssText = 'position:fixed;left:-9999px;opacity:0;';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          resolve();
+        } catch (err) {
+          document.body.removeChild(textArea);
+          reject(err);
+        }
+      });
+    }
+  }
+});
+
+(function ($, Drupal) {
+  Drupal.behaviors.removePdfSuffix = {
+    attach: function (context, settings) {
+      if ($("body").hasClass("view-cartera-de-servicios-de-atencion-hospitalaria-page-1")) {
+        $(".file--application-pdf a", context)
+          .once("removePdfSuffix")
+          .each(function () {
+            const $link = $(this);
+            const text = $link.text().trim();
+            const newText = text.replace(/\s*\.pdf\s*$/i, "");
+            $link.text(newText);
+          });
+      }
+    },
+  };
+})(jQuery, Drupal);
+
+/* Apretura y cierre del menú responsive */
+
+(function ($, Drupal) {
+  Drupal.behaviors.responsiveOffCanvas = {
+    attach: function (context, settings) {
+      const $toggle = $('#toggle-icon', context);
+      const $menu = $('.off-canvas-wrapper', context);
+
+      // Evitamos volver a asignar los eventos si ya están
+      if (!$toggle.data('initialized')) {
+
+        // Función para abrir/cerrar menú
+        const toggleMenu = function (e) {
+          e.preventDefault();
+          if ($menu.is(':visible')) {
+            $menu.hide();
+            $toggle.removeClass('active');
+          } else {
+            $menu.show();
+            $toggle.addClass('active');
+          }
+        };
+
+        // Click en toggle
+        $toggle.once('responsiveOffCanvas').on('click', toggleMenu);
+        $toggle.data('initialized', true);
+
+        // Click fuera del menú
+        $(document).once('responsiveOffCanvasClick').on('click', function (event) {
+          if (!$menu.is(event.target) && $menu.has(event.target).length === 0 &&
+            !$toggle.is(event.target)) {
+            $menu.hide();
+            $toggle.removeClass('active');
+          }
+        });
+      }
+    }
+  };
+})(jQuery, Drupal);
+
