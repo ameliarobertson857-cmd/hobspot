@@ -64,7 +64,7 @@ def main():
     filtered_df = documents_df.loc[remaining_indexes].copy()
 
     if contacts_needing_filename_lookup:
-        attachment_names_by_contact = build_attachment_names_by_contact(
+        attachment_names_by_contact, _ = build_attachment_names_by_contact(
             {
                 contact_id: attachment_ids_by_contact[contact_id]
                 for contact_id in contacts_needing_filename_lookup

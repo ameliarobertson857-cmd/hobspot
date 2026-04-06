@@ -1,4 +1,5 @@
 import argparse
+import json
 import re
 import time
 from pathlib import Path
@@ -12,6 +13,7 @@ from config import HUBSPOT_TOKEN
 PENDING_DOCUMENTS_FILE = "pending_documents.xlsx"
 DOWNLOADS_DIR = "downloaded_pdfs"
 RESULTS_FILE = "downloaded_pdfs_log.xlsx"
+PROCESSED_PDFS_FILE = "vec_processed_pdfs.json"
 DOCUMENT_URL_COLUMN = "document_url"
 DOCUMENT_FILENAME_COLUMN = "document_filename"
 CONTACT_ID_COLUMN = "contact_id"
@@ -51,6 +53,36 @@ def filename_from_url(file_url):
     parsed_url = urlparse(str(file_url))
     filename = parse_qs(parsed_url.query).get("filename", [""])[0]
     return unquote(filename).strip() or None
+
+
+def load_processed_pdf_names(processed_file=PROCESSED_PDFS_FILE):
+    registry_path = Path(processed_file)
+    if not registry_path.exists():
+        return set()
+
+    try:
+        data = json.loads(registry_path.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+
+    if isinstance(data, dict):
+        records = data.get("processed_pdfs", [])
+    elif isinstance(data, list):
+        records = data
+    else:
+        records = []
+
+    processed_names = set()
+    for record in records:
+        filename = str(record.get("source_pdf_filename") or "").strip()
+        if filename:
+            processed_names.add(filename.casefold())
+
+        archived_path = str(record.get("archived_pdf_path") or "").strip()
+        if archived_path:
+            processed_names.add(Path(archived_path).name.casefold())
+
+    return processed_names
 
 
 def extract_file_id_from_url(file_url):
@@ -179,6 +211,15 @@ def download_pdf_bytes(file_url):
     return content
 
 
+def is_valid_pdf_file(file_path):
+    path = Path(file_path)
+    if not path.exists() or path.stat().st_size == 0:
+        return False
+
+    with path.open("rb") as file_handle:
+        return file_handle.read(5) == b"%PDF-"
+
+
 def load_pending_documents(input_file, limit=None):
     input_path = Path(input_file)
     if not input_path.exists():
@@ -211,6 +252,7 @@ def main():
 
     api_session = create_api_session()
     ensure_required_file_scopes(api_session)
+    processed_names = load_processed_pdf_names()
 
     results = []
     downloaded_count = 0
@@ -223,6 +265,19 @@ def main():
         output_path = build_output_path(row, output_dir, index)
 
         print(f"[{index}/{len(documents_df)}] {output_path.name}")
+
+        if output_path.name.casefold() in processed_names:
+            skipped_count += 1
+            results.append(
+                {
+                    **row,
+                    "status": "skipped_processed_upload",
+                    "local_pdf_path": str(output_path),
+                    "hubspot_file_id": file_id or "",
+                    "error": "",
+                }
+            )
+            continue
 
         if not file_id:
             failed_count += 1
@@ -239,7 +294,7 @@ def main():
             )
             continue
 
-        if args.skip_existing and output_path.exists() and output_path.stat().st_size > 0:
+        if args.skip_existing and is_valid_pdf_file(output_path):
             skipped_count += 1
             results.append(
                 {
